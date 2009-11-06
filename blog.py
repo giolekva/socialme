@@ -190,8 +190,8 @@ class PostComment(BaseHandler):
 				self.redirect('/%s' % blog.slug)
 				return
 				
-			if link == 'http://':
-				link = ''
+			if link == 'http://' or link == '':
+				link = None
 						
 			if parent_comment is None:
 				comment = Comment(entry = blog, name = name, link = link, email = email, email_md5 = email_md5, comment = comm, parent_comment = None)
