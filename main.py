@@ -49,6 +49,7 @@ if __name__ == "__main__":
 		blogger_id = '8574388056364017758',
 		
 		lastfm_api_key = 'your api key',
+		lastfm_user = 'lastfm username',
 		debug = True,
 	)
 	

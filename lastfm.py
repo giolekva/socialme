@@ -65,6 +65,7 @@ class TopChartsHandler(web.RequestHandler):
 		super(TopChartsHandler, self).__init__(*args, **kwargs)
 		
 		self.api_key = self.settings['lastfm_api_key']
+		self.user = self.settings['lastfm_user']
 		self.limit = 15
 		
 	def get(self):
@@ -72,7 +73,7 @@ class TopChartsHandler(web.RequestHandler):
 		if period is None:
 			period = 'overall'
 			
-		res = urlfetch.fetch(url = 'http://ws.audioscrobbler.com/2.0/?method=%s&user=giolekva&api_key=%s&period=%s' % (self.method, self.api_key, period))
+		res = urlfetch.fetch(url = 'http://ws.audioscrobbler.com/2.0/?method=%s&user=%s&api_key=%s&period=%s' % (self.method, self.user, self.api_key, period))
 
 		if res.status_code == 200:
 			items = []
