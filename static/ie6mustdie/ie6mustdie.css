@@ -1,0 +1,108 @@
+/** Clearfix */
+.clearfix:after {
+	clear: both;
+    content: ".";
+    display: block;
+    height: 0;
+    line-height: 0;
+    visibility: hidden;
+}
+.clearfix {
+    display: inline-block;
+}
+html[xmlns] .clearfix {
+    display: block;
+}
+* html .clearfix {
+    height: 1%;
+}
+/** End Clearfix */
+#ie6mustdie {
+  display: none;
+}
+#ie6mustdie,
+#ie6mustdie div.ie6mustdie-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+#ie6mustdie * {
+  padding: 0;
+  margin: 0;
+}
+#ie6mustdie a:link,
+#ie6mustdie a:visited {
+  color: #2849b1;
+  font: bold 13px arial;
+}
+#ie6mustdie a:hover {
+  color: red;
+  text-decoration: none;
+}
+#ie6mustdie div.ie6mustdie-overlay {
+  background-color: #000;
+  opacity: 0.6;
+  filter: alpha(opacity=60);
+}
+#ie6mustdie div.ie6mustdie-dialog {
+  background-color: #fff;
+  border: 12px solid #eee;
+  height: 320px;
+  left: 50%;
+  margin: 0 0 0 -300px;
+  position: absolute;
+  top: 20px;
+  width: 600px;
+}
+#ie6mustdie div.ie6mustdie-header {
+  background-color: #83AADB;
+  padding: 8px 0;
+}
+#ie6mustdie div.ie6mustdie-header h1 {
+  color: #fff;
+  font: bold 1.2em arial;
+  text-align: center;
+}
+#ie6mustdie div.ie6mustdie-body p {
+  font: normal 0.8em sylfaen;
+  line-height: 1.5em;
+  margin: 12px 0;
+  text-align: center;
+}
+#ie6mustdie div.ie6mustdie-body h2 {
+  font: bold 1em sylfaen;
+  text-align: center;
+  margin: 12px 0 0 0;
+}
+#ie6mustdie div.ie6mustdie-browsers {
+  margin: 12px auto;
+  width: 558px;
+}
+#ie6mustdie div.ie6mustdie-browsers li {
+  display: inline;
+  float: left;
+  text-align: center;
+}
+#ie6mustdie div.ie6mustdie-browsers li div {
+  background: url(browsers.png) no-repeat;
+  height: 93px;
+  margin: 4px;
+  width: 85px;
+}
+#ie6mustdie div.ie6mustdie-browsers li div.safari {
+  background-position: -222px -6px;
+}
+#ie6mustdie div.ie6mustdie-browsers li div.ff {
+  background-position: -118px -6px;
+}
+#ie6mustdie div.ie6mustdie-browsers li div.chrome {
+  background-position: -8px -106px;
+}
+#ie6mustdie div.ie6mustdie-browsers li div.opera {
+  background-position: -219px -106px;
+}
+#ie6mustdie div.ie6mustdie-browsers li div.ie {
+  background-position: -8px -4px;
+}

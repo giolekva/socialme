@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	{% set date_format = "%Y-%m-%dT%H:%M:%SZ" %}
+	<title>{{ escape(handler.settings['blog_title']) }}</title>
+	{% if len(entries) > 0 %}
+	<updated>{{ max(e.updated_time for e in entries).strftime(date_format) }}</updated>
+	{% else %}
+	<updated>{{ datetime.datetime.utcnow().strftime(date_format) }}</updated>
+	{% end %}
+	<id>http://{{ request.host }}/feed</id>
+	<link rel="alternate" href="http://{{ request.host }}/" title="{{ escape(handler.settings["blog_title"]) }}" type="text/html"/>
+	<link rel="self" href="{{ request.full_url() }}" title="{{ escape(handler.settings["blog_title"]) }}" type="application/atom+xml"/>
+	<link rel="hub" href="http://pubsubhubbub.appspot.com" title="{{ escape(handler.settings["blog_title"]) }}" type="application/atom+xml"/>
+	<author>
+		<name>{{ escape(handler.settings["blog_author"]) }}</name>
+		<uri>http://{{ request.host }}</uri>
+	</author>
+	{% for entry in entries %}
+	<entry>
+		<id>http://{{ request.host }}/entry/{{ entry.slug }}</id>
+		<title type="text">{{ escape(entry.title) }}</title>
+		<link rel="alternate" href="http://{{ request.host }}/{{ entry.slug }}" type="text/html"/>
+		<updated>{{ entry.updated_time.strftime(date_format) }}</updated>
+		<published>{{ entry.published_time.strftime(date_format) }}</published>
+		<content type="xhtml" xml:base="http://{{ request.host }}/">
+			<div xmlns="http://www.w3.org/1999/xhtml">{{ entry.body }}</div>
+		</content>
+		{% for tag in entry.tags() %}
+		<category term="{{ escape(tag) }}" />
+		{% end %}
+	</entry>
+	{% end %}
+</feed>

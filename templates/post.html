@@ -1,0 +1,108 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ escape(blog.title) }}{% end %}
+
+{% block content %}
+<article class="hentry" pubdate="{{ blog.published_time.strftime(date_format) }}">
+	<div class="date-box">
+		<div class="month">{{ handler.settings['months'][blog.published_time.month-1] }}</div>
+		<div class="day">{{ blog.published_time.day }}</div>
+		<div class="year">{{ blog.published_time.year }}</div>
+	</div>
+	<header><h2 class="entry-title">{{ blog.title }}</h2></header>
+	<div class="entry-content">
+		{{ handler.make_smile(blog.body) }}
+	</div>
+	<footer>
+		<span style="float: left; font-weight: bold;">ტეგები:</span>
+		<ul class="tags">
+			{% for tag in blog.tags() %}
+			<li><a href="/tag/{{ tag }}" rel="tag">{{ tag }}</a></li>
+			{% end %}
+		</ul>
+		{% if len(blog.similar_entries()) > 0 %}
+		მსგავსი პოსტები:
+		<ul>
+			{% for similar in blog.similar_entries() %}
+			<li><a href="/{{ similar.slug }}" title="{{ similar.title }}">{{ similar.title }}</a></li>
+			{% end %}
+		</ul>
+		{% else %}
+		მსგავსი პოსტები ვერ მოიძებნა <img class="smile" src="/static/smileys/frown.png" /><br/><br/>
+		{% end %}
+		<p style="font-weight: bold;">{{ blog.comments_count }} კომენტარი</p>
+	</footer>
+	<div id="comments" class="clear">
+		{% for item in comments %}
+		<article class="comment" style="margin-left: {{ item['dif'] }}px;" margin="{{ item['dif'] }}" pubdate="{{ item['comment'].published.strftime(date_format) }}">
+			<a href="#" id="{{ item['comment'].key() }}" class="image-link reply" onclick="return false;"><img src="/static/icons/reply.gif" /></a>
+			<span class="author" item="vcard">
+				<a href="{{ item['comment'].link }}" class="image-link avatar">
+					<img src="http://www.gravatar.com/avatar/{{ item['comment'].email_md5 }}?size=40" itemprop="photo" />
+				</a>
+				<div style="font-weight: bold;">
+					{% if item['comment'].link %}<a href="{{ item['comment'].link }}" itemprop="url">{{ item['comment'].name }}</a> {% else %}<span itemprop="nickname">{{ item['comment'].name }}</span>{% end %}
+				</div>
+			</span>
+			<span>{{ handler.make_smile(handler.paragraphs(item['comment'].comment)) }}</span>
+		</article>
+		{% end %}
+	</div>
+	<div id="comment_form">
+		<form action="/{{ blog.slug }}/post_comment" method="post">
+			<p>
+				<input id="name" type="text" name="name" value="{{ name }}" tabindex="1" /> <label for="name">სახელი</label>
+			</p>
+			<p>
+				<input id="link" type="url" name="link" value="{{ link }}" tabindex="2" /> <label for="link">მისამართი</label>
+			</p>
+			<p>
+				<input id="email" name="email" type="email" value="{{ email }}" tabindex="3" /> <label for="email">ემაილი (არ გამოქვეყნდება)</label>
+			</p>
+			<p>
+				<textarea id="comment" name="comment" rows="10" tabindex="4" style="height: 150px; width: 500px;"></textarea>
+			</p>
+			<input type="submit" value="გაგზავნა" name="submit" />
+			<input id="parent_comment" type="hidden" name="parent_comment" />
+			<input id="honypot" type="hidden" name="honypot" />
+		</form>
+	</div>
+</article>
+<div id="confirm-message" class="hidden">
+დარწმუნებული ხართ რომ გინდათ ადრესატის შეცვლა?
+<div style="padding-top: 10px;">
+	<input id="yes" type="button" value="დიახ" />
+	<input id="no" type="button" value="არა" />
+</div>
+</div>
+{% end %}
+
+{% block js %}
+<script type="text/javascript" language="javascript">
+(function() {
+	$(function() {
+		var comment_id = '';
+		
+		$('#no').click(function() {
+			$.unblockUI();
+		});
+		
+		$('#yes').click(function() {
+			$.unblockUI();
+			$('#parent_comment')[0].value = comment_id;
+		});
+		
+		$('a.reply').click(function() {
+			if($('#parent_comment')[0].value) {
+				comment_id = this.id;
+				$.blockUI({
+					message: $('#confirm-message')
+				});
+			} else {
+				$('#parent_comment')[0].value = this.id;
+			}
+		});
+	});
+})();
+</script>
+{% end %}

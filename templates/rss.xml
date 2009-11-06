@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+	{% set date_format = "%a, %d %b %Y %H:%M:%S GMT" %}
+	<title>{{ escape(handler.settings['blog_title']) }}</title>
+	{% if len(entries) > 0 %}
+	<lastBuildDate>{{ max(e.updated_time for e in entries).strftime(date_format) }}</lastBuildDate>
+	{% else %}
+	<lastBuildDate>{{ datetime.datetime.utcnow().strftime(date_format) }}</lastBuildDate>
+	{% end %}
+	<atom:link rel="self" href="http://{{ request.host }}/rss" title="{{ escape(handler.settings["blog_title"]) }}" type="application/rss+xml" />
+	<atom:link rel="alternate" href="http://{{ request.host }}/" title="{{ escape(handler.settings["blog_title"]) }}" type="text/html"/>
+	<link>http://{{ request.host }}/</link>
+	<language>ka</language>
+	<description>ბლოგი პროგრამირების შესახებ</description>
+	{% for entry in entries %}
+	<item>
+		<title>{{ escape(entry.title) }}</title>
+		<link>http://{{ request.host }}/{{ entry.slug }}</link>
+		<guid>http://{{ request.host }}/{{ entry.slug }}</guid>
+		<pubDate>{{ entry.published_time.strftime(date_format) }}</pubDate>
+		<description>
+			<![CDATA[{{ entry.body }}]]>
+		</description>
+		
+		{% for tag in entry.tags() %}
+		<category>{{ escape(tag) }}</category>
+		{% end %}
+		<comments>http://{{ request.host }}/{{ entry.slug }}#comments</comments>
+	</item>
+	{% end %}
+</channel>
+</rss>

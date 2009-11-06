@@ -1,0 +1,8 @@
+<header>
+	<h5>არქივი</h5>
+</header>
+<ol>
+	{% for archive in arch %}
+	<li><a href="/{{ archive.year }}/{% if archive.month < 10 %}0{% end %}{{ archive.month }}">{{ archive.year }} - {{ handler.settings['months'][archive.month-1] }} ({{ archive.count }})</a></li>
+	{% end %}
+</ol>

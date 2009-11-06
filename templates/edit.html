@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ edit_path }}" method="post">
+	<input type="text" name="title" style="width: 300px;" value="{{ blog.title }}" /> სათაური<br/>
+	<input type="text" name="slug" style="width: 300px;" value="{{ blog.slug }}" /> slug<br/>
+	<textarea rows="30" cols="50" name="body">{{ blog.body }}</textarea>
+	<input type="text" name="tags" style="width: 300px;" value="{{ blog.tags }}" /> ტეგები<br/>
+	<input type="submit" name="publish" value="გამოქვეყნება" /> <input type="submit" name="save" value="შენახვა">
+</form>
+{% end %}

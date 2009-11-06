@@ -1,0 +1,8 @@
+<header>
+	<h5>ტეგები</h5>
+</header>
+<ul>
+	{% for tag in tags %}
+	<li style="font-size: {% if tag.count/10 < 1 %} {{ '1em' }} {% elif tag.count/10 >= 2 %} {{ '1.5em' }} {% else %} {{ '1.3em' }} {% end %}; float: left; height: 2em; margin: 0px 5px;"><a href="/tag/{{ tag.name }}" rel="tag" style="text-decoration: none;">{{ tag.name }}</a></li>
+	{% end %}
+</ul>
