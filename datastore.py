@@ -7,7 +7,6 @@ class Entry(ds.Model):
     title = ds.StringProperty(required = True)
     slug = ds.StringProperty(required = True)
     body = ds.TextProperty(required = True)
-    comments_count = ds.IntegerProperty()
     published_time = ds.DateTimeProperty(auto_now_add = True)
     updated_time = ds.DateTimeProperty(auto_now = True)
     is_public = ds.BooleanProperty()
@@ -44,7 +43,6 @@ def ToEntry(e):
     r.title = e.title
     r.slug = e.slug
     r.body = e.body
-    r.comments_count = e.comments_count
     r.published_time = e.published_time
     r.updated_time = e.updated_time
     r.is_public = e.is_public
@@ -116,7 +114,6 @@ class Datastore(db.DB):
             title=entry.title,
             slug=entry.slug,
             body=entry.body,
-            comments_count=entry.comments_count,
             published_time=entry.published_time,
             updated_time=entry.updated_time,
             is_public=entry.is_public,
@@ -165,6 +162,13 @@ class Datastore(db.DB):
     def CommentsForEntryWithKey(self, key):
         comments = Comment.all().filter("entry = ", key).order('published')
         return [ToComment(c) for c in comments]
+
+    def CommentsCountForEntryWithKey(self, key):
+        comments = Comment.all(keys_only=True).filter("entry = ", key)
+        ret = 0
+        for _ in comments:
+            ret += 1
+        return ret
 
     def CommentsSave(self, com):
         parent_comment_key = None

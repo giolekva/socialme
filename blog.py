@@ -38,6 +38,7 @@ def AugmentWithTags(entries, db):
                         e.tags = categories.tags
                 else:
                         e.tags = []
+                e.comments_count = db.CommentsCountForEntryWithKey(e.key)
         return entries
 
 
@@ -204,6 +205,7 @@ class EntryHandler(BaseHandler):
 			if link == '' or link is None:
 				link = 'http://'
                         comments = self.db.CommentsForEntryWithKey(blog.key)
+                        blog.comments_count = len(comments)
 			comments = GenerateThreadedComments(None, comments)
 			self.render('post.html',
                                     blog=blog,
@@ -243,8 +245,6 @@ class PostComment(BaseHandler):
 			else:
 				comment = Comment(entry = blog, name = name, link = link, email = email, email_md5 = email_md5, comment = comm, parent_comment = self.db.CommentsGet(parent_comment))
 			self.db.CommentsSave(comment)
-			blog.comments_count += 1
-			self.db.EntriesSave(blog)
 			self.set_cookie('whoami', str(comment.key))
 			taskqueue.add(url = '/admin/new_comment', method = 'GET')
 			self.recalc_comments()
@@ -258,7 +258,6 @@ def new_entry(db, title, slug, body, tags, published = datetime.now(), updated =
                      body=body,
                      published_time=published,
                      updated_time=updated,
-                     comments_count=0,
                      is_public=is_public,
                      was_public=was_public)
 	for tag in tags:

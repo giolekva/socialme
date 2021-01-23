@@ -1,12 +1,11 @@
 import re
 
 class Entry(object):
-    def __init__(self, key=None, title=None, slug=None, body=None, comments_count=None, published_time=None, updated_time=None, is_public=None, was_public=None, tags=None):
+    def __init__(self, key=None, title=None, slug=None, body=None, published_time=None, updated_time=None, is_public=None, was_public=None, tags=None):
         self.key = key
         self.title = title
         self.slug = slug
         self.body = body
-        self.comments_count = comments_count
         self.published_time = published_time
         self.updated_time = updated_time
         self.is_public = is_public
@@ -101,6 +100,9 @@ class DB(object):
         raise NotImplementedError
 
     def CommentsForEntryWithKey(self, key):
+        raise NotImplementedError
+
+    def CommentsCountForEntryWithKey(self, key):
         raise NotImplementedError
 
     def CommentsSave(self, com):
