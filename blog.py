@@ -16,6 +16,13 @@ import smileys
 from pubsubhubbub_publish import *
 
 
+class Archive(object):
+    def __init__(self, year, month, count):
+	self.year = year
+	self.month = month
+	self.count = count
+
+
 def check_has_next_page(entries):
 	if len(entries) == 6:
 		del entries[5]
@@ -81,12 +88,24 @@ class BaseHandler(web.RequestHandler):
 	def get_archive(self):
 		res = memcache.get('archive')
 		if res is None:
-			archive = self.db.Archive()
-			memcache.set('archive', self.render_string('archive.html', arch=archive))
+                        res = self.recalc_archive()
 		return res
 
 	def recalc_archive(self):
-		memcache.set('archive', self.render_string('archive.html', arch = self.db.Archive()))
+                published_times = self.db.EntriesGetPublishedTimes()
+                counts = {}
+                for p in published_times:
+                        k = (p.year, p.month)
+                        if k in counts:
+                                counts[k] += 1
+                        else:
+                                counts[k] = 1
+                archive = [Archive(year=c[0][0], month=c[0][1], count=c[1])
+                           for c in counts.items()]
+                archive.sort(reverse=True, key=lambda a: a.year * 12 + a.month)
+                rendered = self.render_string('archive.html', arch=archive)
+		memcache.set('archive', rendered)
+                return rendered
 
 	def make_smile(self, text):
 		return smileys.make_smile(text)
@@ -255,13 +274,6 @@ def new_entry(db, title, slug, body, tags, published = datetime.now(), updated =
                          published_time=published,
                          is_public=is_public)
         db.CategoriesSave(cat)
-	year, month = (published.year, published.month)
-	archive = db.ArchiveGet(year, month)
-	if archive is None:
-		archive = Archive(year=year, month=month, count=1)
-	else:
-		archive.count = archive.count+1
-	db.ArchiveSave(archive)
 	return blog
 
 

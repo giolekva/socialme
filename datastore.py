@@ -36,12 +36,6 @@ class Comment(ds.Model):
     published = ds.DateTimeProperty(auto_now_add = True)
 
 
-class Archive(ds.Model):
-    year = ds.IntegerProperty(required = True)
-    month = ds.IntegerProperty(required = True)
-    count = ds.IntegerProperty()
-
-
 def ToEntry(e):
     if e is None:
         return None
@@ -97,17 +91,6 @@ def ToComment(c):
     return r
 
 
-def ToArchive(a):
-    if a is None:
-        return None
-    r = db.Archive()
-    r.key = a.key()
-    r.year = a.year
-    r.month = a.month
-    r.count = a.count
-    return r
-
-
 class Datastore(db.DB):
     def EntriesGet(self, slug):
         return ToEntry(Entry.all().filter('slug =', slug).get())
@@ -122,6 +105,10 @@ class Datastore(db.DB):
     def EntriesDateRange(self, begin, end, count, after=0):
         entries = Entry.all().filter('published_time >=', begin).filter('published_time <', end).filter('is_public =', True).order('-published_time').fetch(count, after)
         return [ToEntry(e) for e in entries]
+
+    def EntriesGetPublishedTimes(self):
+        q = ds.GqlQuery('SELECT published_time FROM Entry WHERE is_public = :1', True)
+        return [e.published_time for e in q]
 
     def EntriesSave(self, entry):
         entry.key = Entry(
@@ -206,13 +193,3 @@ class Datastore(db.DB):
                 comment=com.comment,
                 parent_comment=parent_comment_key,
             ).put()
-
-    def Archive(self):
-        archive = Archive.all().order('-year').order('-month')
-        return [ToArchive(a) for a in archive]
-
-    def ArchiveGet(self, year, month):
-        return ToArchive(Archive.all().filter('year =', year).filter('month =', month).get())
-
-    def ArchiveSave(self, archive):
-        archive.key = Archive(key=archive.key, year=archive.year, month=archive.month, count=archive.count).put()

@@ -57,14 +57,6 @@ class Comment(object):
         return self.__repr__()
 
 
-class Archive(object):
-    def __init__(self, key=None, year=None, month=None, count=None):
-        self.key = key
-	self.year = year
-	self.month = month
-	self.count = count
-
-
 class DB(object):
     def EntriesGet(self, slug):
         raise NotImplementedError
@@ -76,6 +68,9 @@ class DB(object):
         raise NotImplementedError
 
     def EntriesDateRange(self, begin, end, count, after=None):
+        raise NotImplementedError
+
+    def EntriesGetPublishedTimes(self):
         raise NotImplementedError
 
     def EntriesSave(self, entry):
@@ -109,15 +104,6 @@ class DB(object):
         raise NotImplementedError
 
     def CommentsSave(self, com):
-        raise NotImplementedError
-
-    def Archive(self):
-        raise NotImplementedError
-
-    def ArchiveGet(self, year, month):
-        raise NotImplementedError
-
-    def ArchiveSave(self, archive):
         raise NotImplementedError
 
     def EntriesSimilar(self, entry):
