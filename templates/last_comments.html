@@ -12,7 +12,7 @@
 					<img src="http://www.gravatar.com/avatar/{{ comment.email_md5 }}?size=40" itemprop="photo" />
 				</a>
 				<div style="font-weight: bold; float: left; margin-right: 5px;">
-					<a href="/{{ comment.entry.slug }}#{{ comment.key() }}" itemprop="url">{{ comment.name }}</a>
+					<a href="/{{ comment.entry.slug }}#{{ comment.key }}" itemprop="url">{{ comment.name }}</a>
 				</div>
 			</span>
 			{{ comment.comment[:50] }}...

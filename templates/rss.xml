@@ -22,8 +22,7 @@
 		<description>
 			<![CDATA[{{ entry.body }}]]>
 		</description>
-		
-		{% for tag in entry.tags() %}
+		{% for tag in entry.tags %}
 		<category>{{ escape(tag) }}</category>
 		{% end %}
 		<comments>http://{{ request.host }}/{{ entry.slug }}#comments</comments>

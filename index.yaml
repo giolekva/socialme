@@ -34,6 +34,11 @@ indexes:
   - name: parent_comment
   - name: published
 
+- kind: Comment
+  ancestor: yes
+  properties:
+  - name: published
+
 - kind: Entry
   properties:
   - name: is_public

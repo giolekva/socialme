@@ -25,7 +25,7 @@
 		<content type="xhtml" xml:base="http://{{ request.host }}/">
 			<div xmlns="http://www.w3.org/1999/xhtml">{{ entry.body }}</div>
 		</content>
-		{% for tag in entry.tags() %}
+		{% for tag in entry.tags %}
 		<category term="{{ escape(tag) }}" />
 		{% end %}
 	</entry>

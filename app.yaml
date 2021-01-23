@@ -15,19 +15,23 @@ handlers:
 - url: /favicon.ico
   static_files: static/favicon.png
   upload: static/favicon.png
-  
+
+- url: /import_json
+  script: main.py
+  login: admin
+
 - url: /import
   script: main.py
   login: admin
-  
+
 - url: /edit
   script: main.py
   login: admin
-  
+
 - url: /clear_datastore
   script: main.py
   login: admin
-  
+
 - url: /calculate_comments
   script: main.py
   login: admin

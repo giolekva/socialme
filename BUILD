@@ -11,6 +11,7 @@ py_appengine_binary(
     data = glob([
         "static/**",
         "templates/**",
+        "*.json",
     ]),
     deps = [
         # requirement("tornado"),

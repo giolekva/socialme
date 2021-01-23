@@ -16,14 +16,14 @@
 	<footer>
 		<span style="float: left; font-weight: bold;">ტეგები:</span>
 		<ul class="tags">
-			{% for tag in blog.tags() %}
+			{% for tag in tags %}
 			<li><a href="/tag/{{ tag }}" rel="tag">{{ tag }}</a></li>
 			{% end %}
 		</ul>
-		{% if len(blog.similar_entries()) > 0 %}
+		{% if len(similar_entries) > 0 %}
 		მსგავსი პოსტები:
 		<ul>
-			{% for similar in blog.similar_entries() %}
+			{% for similar in similar_entries %}
 			<li><a href="/{{ similar.slug }}" title="{{ similar.title }}">{{ similar.title }}</a></li>
 			{% end %}
 		</ul>
@@ -35,7 +35,7 @@
 	<div id="comments" class="clear">
 		{% for item in comments %}
 		<article class="comment" style="margin-left: {{ item['dif'] }}px;" margin="{{ item['dif'] }}" pubdate="{{ item['comment'].published.strftime(date_format) }}">
-			<a href="#" id="{{ item['comment'].key() }}" class="image-link reply" onclick="return false;"><img src="/static/icons/reply.gif" /></a>
+			<a href="#" id="{{ item['comment'].key }}" class="image-link reply" onclick="return false;"><img src="/static/icons/reply.gif" /></a>
 			<span class="author" item="vcard">
 				<a href="{{ item['comment'].link }}" class="image-link avatar">
 					<img src="http://www.gravatar.com/avatar/{{ item['comment'].email_md5 }}?size=40" itemprop="photo" />
@@ -82,16 +82,13 @@
 (function() {
 	$(function() {
 		var comment_id = '';
-		
 		$('#no').click(function() {
 			$.unblockUI();
 		});
-		
 		$('#yes').click(function() {
 			$.unblockUI();
 			$('#parent_comment')[0].value = comment_id;
 		});
-		
 		$('a.reply').click(function() {
 			if($('#parent_comment')[0].value) {
 				comment_id = this.id;
