@@ -1,5 +1,5 @@
 ﻿import os
-import wsgiref.handlers
+
 from tornado.wsgi import WSGIApplication
 
 import datastore
@@ -7,7 +7,7 @@ from blog import *
 from lastfm import *
 
 
-if __name__ == "__main__":
+def SetupServer():
 	handlers = [
 		# LAST.FM
 		(r'/lastfm/api/toptracks$', TopTracksHandler),
@@ -54,5 +54,7 @@ if __name__ == "__main__":
 
                 db = datastore.Datastore(),
 	)
-	application = WSGIApplication(handlers, **settings)
-	wsgiref.handlers.CGIHandler().run(application)
+	return WSGIApplication(handlers, **settings)
+
+
+app = SetupServer()

@@ -1,6 +1,6 @@
 runtime: python27
 api_version: 1
-threadsafe: false
+threadsafe: true
 
 default_expiration: "32d"
 
@@ -17,32 +17,32 @@ handlers:
   upload: static/favicon.png
 
 - url: /import_json
-  script: main.py
+  script: main.app
   login: admin
 
 - url: /import
-  script: main.py
+  script: main.app
   login: admin
 
 - url: /edit
-  script: main.py
+  script: main.app
   login: admin
 
 - url: /clear_datastore
-  script: main.py
+  script: main.app
   login: admin
 
 - url: /calculate_comments
-  script: main.py
+  script: main.app
   login: admin
 
 - url: /admin
-  script: main.py
+  script: main.app
   login: admin
 
 - url: /tags
-  script: main.py
+  script: main.app
   login: admin
 
 - url: /.*
-  script: main.py
+  script: main.app
