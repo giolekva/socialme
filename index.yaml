@@ -10,34 +10,10 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-- kind: Archive
-  properties:
-  - name: year
-    direction: desc
-  - name: month
-    direction: desc
-
-- kind: Categories
-  properties:
-  - name: is_public
-  - name: tags
-  - name: published_time
-    direction: desc
-
-- kind: Comment
-  properties:
-  - name: entry
-  - name: published
-
-- kind: Comment
-  properties:
-  - name: parent_comment
-  - name: published
-
 - kind: Comment
   ancestor: yes
   properties:
-  - name: published
+  - name: published_time
 
 - kind: Entry
   properties:

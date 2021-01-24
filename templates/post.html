@@ -34,7 +34,7 @@
 	</footer>
 	<div id="comments" class="clear">
 		{% for item in comments %}
-		<article class="comment" style="margin-left: {{ item['dif'] }}px;" margin="{{ item['dif'] }}" pubdate="{{ item['comment'].published.strftime(date_format) }}">
+		<article class="comment" style="margin-left: {{ item['dif'] }}px;" margin="{{ item['dif'] }}" pubdate="{{ item['comment'].published_time.strftime(date_format) }}">
 			<a href="#" id="{{ item['comment'].key }}" class="image-link reply" onclick="return false;"><img src="/static/icons/reply.gif" /></a>
 			<span class="author" item="vcard">
 				<a href="{{ item['comment'].link }}" class="image-link avatar">

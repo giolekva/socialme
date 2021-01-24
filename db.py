@@ -24,7 +24,7 @@ class Tag(object):
 
 
 class Comment(object):
-    def __init__(self, key=None, entry=None, name=None, link=None, email=None, email_md5=None, comment=None, parent_comment=None, published=None):
+    def __init__(self, key=None, entry=None, name=None, link=None, email=None, email_md5=None, comment=None, parent_comment=None, published_time=None):
         self.key = key
 	self.entry = entry
 	self.name = name
@@ -33,7 +33,7 @@ class Comment(object):
 	self.email_md5 = email_md5
 	self.comment = comment
 	self.parent_comment = parent_comment
-	self.published = published
+	self.published_time = published_time
 
     def __repr__(self):
         ret = "{" + str(self.key)

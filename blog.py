@@ -43,22 +43,26 @@ class BaseHandler(web.RequestHandler):
 	def get_comments(self):
 		res = memcache.get('comments')
 		if res is None:
-			res = self.render_string('last_comments.html', comments = self.db.Comments(3))
-			memcache.set('comments', res)
+                    res = self.recalc_comments()
 		return res
 
 	def recalc_comments(self):
-		memcache.set('comments', self.render_string('last_comments.html', comments = self.db.Comments(3)))
+            comments = self.db.Comments(3)
+            res = self.render_string('last_comments.html', comments=comments)
+	    memcache.set('comments', res)
+            return res
 
 	def get_tags(self):
 		res = memcache.get('tags')
 		if res is None:
-			res = self.render_string('tag_cloud.html', tags = self.db.TagsAll())
-			memcache.set('tags', res)
+                    res = self.recalc_tags()
 		return res
 
 	def recalc_tags(self):
-		memcache.set('tags', self.render_string('tag_cloud.html', tags = self.db.TagsAll()))
+            tags = self.db.TagsAll()
+            res = self.render_string('tag_cloud.html', tags=tags)
+	    memcache.set('tags', res)
+            return res
 
 	def get_archive(self):
 		res = memcache.get('archive')
@@ -223,13 +227,13 @@ class PostComment(BaseHandler):
 			self.redirect('/%s' % blog.slug)
 
 
-def new_entry(db, title, slug, body, tags, published = datetime.now(), updated = datetime.now(), is_public = True, was_public = True):
+def new_entry(db, title, slug, body, tags, published_time=datetime.now(), updated=datetime.now(), is_public=True, was_public=True):
 	slug = slug.replace(' ', '-')
 	blog = Entry(title=title,
                      slug=slug,
                      body=body,
                      tags=tags,
-                     published_time=published,
+                     published_time=published_time,
                      updated_time=updated,
                      is_public=is_public,
                      was_public=was_public)
@@ -257,7 +261,7 @@ class EditHandler(BaseHandler):
 			blog.is_public = False
 		else:
 			if not blog.was_public:
-				blog.published = datetime.now()
+				blog.published_time = datetime.now()
 			blog.is_public = True
 			blog.was_public = True
                 self.db.EntriesSave(blog)
@@ -344,14 +348,20 @@ class CommentsHandler(sax.handler.ContentHandler):
 			m = hashlib.md5()
 			m.update(self.email)
 			email_md5 = m.hexdigest()
-			com = Comment(entry = self.entry, name = self.name, link = self.link, email = self.email, email_md5 = email_md5, published = self.published, comment = self.comment)
+			com = Comment(parent=self.entry,
+                                      name=self.name,
+                                      link=self.link,
+                                      email=self.email,
+                                      email_md5=email_md5,
+                                      published_time=self.published_time,
+                                      comment=self.comment)
 			com.put()
 			print 'imported'
 		elif name == 'published':
 			self.is_published = 0
 			if self.is_entry:
 				print self.content.encode('utf-8')
-				self.published = to_date(self.content)
+				self.published_time = to_date(self.content)
 		elif name == 'content':
 			self.is_content = 0
 			if self.is_entry:
@@ -415,7 +425,7 @@ class EntriesHandler(sax.handler.ContentHandler):
 	def endElement(self, name):
 		if name == 'entry':
 			self.is_entry = 0
-			blog = new_entry(self.db, self.title, self.title, self.body, self.tags, self.published, self.updated, True, True)
+			blog = new_entry(self.db, self.title, self.title, self.body, self.tags, self.published_time, self.updated, True, True)
 			import_comments(self.comments_url, blog)
 		elif name == 'title':
 			self.is_title = 0
@@ -432,7 +442,7 @@ class EntriesHandler(sax.handler.ContentHandler):
 		elif name == 'published':
 			self.is_published = 0
 			if self.is_entry:
-				self.published = to_date(self.content)
+				self.published_time = to_date(self.content)
 		elif name == 'updated':
 			self.is_updated = 0
 			if self.is_entry:
@@ -467,7 +477,7 @@ class ImportJsonHandler(web.RequestHandler):
                                           e['Url'][e['Url'].rfind('/') + 1 : ],
                                           e['Content'],
                                           e['Tags'],
-                                          published=pubdate,
+                                          published_time=pubdate,
                                           is_public=True,
                                           was_public=True)
                         # sleep(1)
@@ -486,7 +496,7 @@ class ImportJsonHandler(web.RequestHandler):
                                         email_md5=c['Gravatar'][c['Gravatar'].rfind('/') + 1 : c['Gravatar'].rfind('?')],
                                         comment=c['Comment'],
                                         parent_comment=parent,
-                                        published=datetime.strptime(c['PubDate'], '%Y-%m-%dT%H:%M:%SZ'),)
+                                        published_time=datetime.strptime(c['PubDate'], '%Y-%m-%dT%H:%M:%SZ'),)
                                 db.CommentsSave(comment)
                                 # sleep(0.1)
                                 thread.append({'Comment': comment, 'Margin': c['Margin']})

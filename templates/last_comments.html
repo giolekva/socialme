@@ -5,7 +5,7 @@
 <ul>
 	{% for comment in comments %}
 	<li>
-		<article class="comment" pubdate="{{ comment.published.strftime(date_format) }}" style="background: #FFFFFF;">
+		<article class="comment" pubdate="{{ comment.published_time.strftime(date_format) }}" style="background: #FFFFFF;">
 			<a href="/{{ comment.entry.slug }}" title="{{ comment.entry.title }}">{{ comment.entry.title }}</a><br/>
 			<span class="author" item="vcard">
 				<a href="{{ comment.link }}" class="image-link avatar">

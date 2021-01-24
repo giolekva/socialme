@@ -22,7 +22,7 @@ class Comment(ds.Model):
     email_md5 = ds.StringProperty(required = True)
     comment = ds.TextProperty(required = True)
     parent_comment = ds.SelfReferenceProperty(required = False)
-    published = ds.DateTimeProperty(auto_now_add = True)
+    published_time = ds.DateTimeProperty(auto_now_add = True)
 
 
 def ToEntry(e):
@@ -46,7 +46,7 @@ def ToComment(c):
         return None
     r = db.Comment()
     r.key = c.key()
-    r.entry = c.entry
+    r.entry = ToEntry(c.parent())
     r.name = c.name
     r.link = c.link
     r.email = c.email
@@ -54,7 +54,7 @@ def ToComment(c):
     r.comment = c.comment
     if c.parent_comment:
         r.parent_comment = ToComment(c.parent_comment)
-    r.published = c.published
+    r.published_time = c.published_time
     return r
 
 
@@ -106,18 +106,18 @@ class Datastore(db.DB):
         return [db.Tag(tag, count) for (tag, count) in counts.items()]
 
     def Comments(self, count):
-        comments = Comment.all().order('-published').fetch(count)
+        comments = Comment.all().order('-published_time').fetch(count)
         return [ToComment(c) for c in comments]
 
     def CommentsGet(self, key):
         return ToComment(Comment.get(key))
 
     def CommentsForEntryWithKey(self, key):
-        comments = Comment.all().filter("entry = ", key).order('published')
+        comments = Comment.all().ancestor(key).order('published_time')
         return [ToComment(c) for c in comments]
 
     def CommentsCountForEntryWithKey(self, key):
-        comments = Comment.all(keys_only=True).filter("entry = ", key)
+        comments = Comment.all(keys_only=True).ancestor(key)
         ret = 0
         for _ in comments:
             ret += 1
@@ -127,22 +127,20 @@ class Datastore(db.DB):
         parent_comment_key = None
         if com.parent_comment:
             parent_comment_key = com.parent_comment.key
-        if com.published:
+        if com.published_time:
             com.key = Comment(
-                key=com.key,
-                entry=com.entry.key,
+                parent=com.entry.key,
                 name=com.name,
                 link=com.link,
                 email=com.email,
                 email_md5=com.email_md5,
                 comment=com.comment,
                 parent_comment=parent_comment_key,
-                published=com.published
+                published_time=com.published_time
             ).put()
         else:
             com.key = Comment(
-                key=com.key,
-                entry=com.entry.key,
+                parent=com.entry.key,
                 name=com.name,
                 link=com.link,
                 email=com.email,
