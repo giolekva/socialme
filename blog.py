@@ -5,8 +5,6 @@ from xml import sax
 
 from tornado import web
 
-from google.appengine.api.labs import taskqueue
-from google.appengine.api import xmpp
 from google.appengine.api import memcache
 
 import datastore
@@ -35,26 +33,6 @@ def AugmentWithCommentCounts(entries, db):
         for e in entries:
                 e.comments_count = db.CommentsCountForEntryWithKey(e.key)
         return entries
-
-
-class PingHubHandler(web.RequestHandler):
-	def get(self):
-		try:
-			publish(self.settings['hub'], 'http://%s/feed' % self.request.host)
-		except:
-			taskqueue.add(url = '/admin/ping_hub', method = 'GET')
-
-
-class NewCommentNotificationHandler(web.RequestHandler):
-	def get(self):
-		status_code = xmpp.OTHER_ERROR
-		try:
-			status_code = xmpp.send_message(self.settings['author_email'], u'ბლოგზე დაიწერა ახალი კომენტარი')
-		except:
-			pass
-
-		if status_code != xmpp.NO_ERROR:
-			taskqueue.add(url = '/admin/new_comment', method = 'GET')
 
 
 class BaseHandler(web.RequestHandler):
@@ -241,7 +219,6 @@ class PostComment(BaseHandler):
 				comment = Comment(entry = blog, name = name, link = link, email = email, email_md5 = email_md5, comment = comm, parent_comment = self.db.CommentsGet(parent_comment))
 			self.db.CommentsSave(comment)
 			self.set_cookie('whoami', str(comment.key))
-			taskqueue.add(url = '/admin/new_comment', method = 'GET')
 			self.recalc_comments()
 			self.redirect('/%s' % blog.slug)
 
@@ -284,8 +261,6 @@ class EditHandler(BaseHandler):
 			blog.is_public = True
 			blog.was_public = True
                 self.db.EntriesSave(blog)
-		if was_public:
-			taskqueue.add(url = '/admin/ping_hub', method = 'GET')
 		self.recalc_archive()
 		self.recalc_tags()
 		self.redirect('/%s' % blog.slug)
@@ -307,8 +282,6 @@ class NewEntryHandler(BaseHandler):
 			was_public = True
 		tags = [tag.strip(' ') for tag in self.get_argument('tags').split(',')]
 		blog = new_entry(self.db, title, slug, body, tags, is_public = is_public, was_public = was_public)
-		if is_public:
-			taskqueue.add(url = '/admin/ping_hub', method = 'GET')
 		self.recalc_archive()
 		self.recalc_tags()
 		self.redirect('/%s' % blog.slug)

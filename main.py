@@ -15,8 +15,6 @@ def SetupServer():
 		(r'/lastfm/api/topartists$', TopArtistsHandler),
 		(r'/lastfm$', LastFMHandler),
 		# BLOG
-		(r'/admin/ping_hub$', PingHubHandler),
-		(r'/admin/new_comment$', NewCommentNotificationHandler),
                 (r'/import_json$', ImportJsonHandler),
 		(r'/import$', ImportHandler),
 		(r'/edit/([^/]+)$', EditHandler),
