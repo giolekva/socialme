@@ -5,8 +5,6 @@ from xml import sax
 
 from tornado import web
 
-from google.appengine.api import memcache
-
 import datastore
 from db import *
 import smileys
@@ -38,10 +36,14 @@ def AugmentWithCommentCounts(entries, db):
 class BaseHandler(web.RequestHandler):
         @property
         def db(self):
-                return self.settings['db']
+            return self.settings['db']
+
+        @property
+        def cache(self):
+            return self.settings['cache']
 
 	def get_comments(self):
-		res = memcache.get('comments')
+		res = self.cache.get('comments')
 		if res is None:
                     res = self.recalc_comments()
 		return res
@@ -49,11 +51,11 @@ class BaseHandler(web.RequestHandler):
 	def recalc_comments(self):
             comments = self.db.Comments(3)
             res = self.render_string('last_comments.html', comments=comments)
-	    memcache.set('comments', res)
+	    self.cache.set('comments', res)
             return res
 
 	def get_tags(self):
-		res = memcache.get('tags')
+		res = self.cache.get('tags')
 		if res is None:
                     res = self.recalc_tags()
 		return res
@@ -61,11 +63,11 @@ class BaseHandler(web.RequestHandler):
 	def recalc_tags(self):
             tags = self.db.TagsAll()
             res = self.render_string('tag_cloud.html', tags=tags)
-	    memcache.set('tags', res)
+	    self.cache.set('tags', res)
             return res
 
 	def get_archive(self):
-		res = memcache.get('archive')
+		res = self.cache.get('archive')
 		if res is None:
                         res = self.recalc_archive()
 		return res
@@ -82,8 +84,8 @@ class BaseHandler(web.RequestHandler):
                 archive = [Archive(year=c[0][0], month=c[0][1], count=c[1])
                            for c in counts.items()]
                 archive.sort(reverse=True, key=lambda a: a.year * 12 + a.month)
-                rendered = self.render_string('archive.html', arch=archive)
-		memcache.set('archive', rendered)
+                res = self.render_string('archive.html', arch=archive)
+		self.cache.set('archive', res)
                 return rendered
 
 	def make_smile(self, text):

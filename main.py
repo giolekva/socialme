@@ -3,6 +3,7 @@
 from tornado.wsgi import WSGIApplication
 
 import datastore
+import memcache
 from blog import *
 from lastfm import *
 
@@ -51,6 +52,7 @@ def SetupServer():
 		debug = True,
 
                 db = datastore.Datastore(),
+                cache = memcache.Memcache(),
 	)
 	return WSGIApplication(handlers, **settings)
 
