@@ -7,16 +7,11 @@ class Entry(ds.Model):
     title = ds.StringProperty(required = True)
     slug = ds.StringProperty(required = True)
     body = ds.TextProperty(required = True)
+    tags = ds.StringListProperty()
     published_time = ds.DateTimeProperty(auto_now_add = True)
     updated_time = ds.DateTimeProperty(auto_now = True)
     is_public = ds.BooleanProperty()
     was_public = ds.BooleanProperty()
-
-
-class Categories(ds.Model):
-    tags = ds.StringListProperty()
-    is_public = ds.BooleanProperty()
-    published_time = ds.DateTimeProperty(auto_now_add = True)
 
 
 class Tag(ds.Model):
@@ -43,22 +38,11 @@ def ToEntry(e):
     r.title = e.title
     r.slug = e.slug
     r.body = e.body
+    r.tags = e.tags
     r.published_time = e.published_time
     r.updated_time = e.updated_time
     r.is_public = e.is_public
     r.was_public = e.was_public
-    return r
-
-
-def ToCategory(c):
-    if c is None:
-        return None
-    r = db.Categories()
-    r.parent = c.parent_key()
-    r.key = c.key()
-    r.tags = c.tags
-    r.is_public = c.is_public
-    r.published_time = c.published_time
     return r
 
 
@@ -104,6 +88,10 @@ class Datastore(db.DB):
         entries = Entry.all().filter('published_time >=', begin).filter('published_time <', end).filter('is_public =', True).order('-published_time').fetch(count, after)
         return [ToEntry(e) for e in entries]
 
+    def EntriesPublicWithTag(self, tag, count, after=0):
+        entries = Entry.all().filter('tags =', tag).filter('is_public =', True).order('-published_time').fetch(count, after)
+        return [ToEntry(e) for e in entries]
+
     def EntriesGetPublishedTimes(self):
         q = ds.GqlQuery('SELECT published_time FROM Entry WHERE is_public = :1', True)
         return [e.published_time for e in q]
@@ -114,34 +102,12 @@ class Datastore(db.DB):
             title=entry.title,
             slug=entry.slug,
             body=entry.body,
+            tags=entry.tags,
             published_time=entry.published_time,
             updated_time=entry.updated_time,
             is_public=entry.is_public,
             was_public=entry.was_public
         ).put()
-
-    def CategoriesPublicWithTag(self, tag, count, after=0):
-        categories = Categories.all().filter('tags =', tag).filter('is_public =', True).order('-published_time').fetch(count, after)
-        return [ToCategory(c) for c in categories]
-
-    def CategoriesForEntryWithKey(self, key):
-        return ToCategory(Categories.all().ancestor(key).get())
-
-    def CategoriesSave(self, cat):
-        if cat.key is not None:
-            cat.key = Categories(
-                key=cat.key,
-                tags=cat.tags,
-                published_time=cat.published_time,
-                is_public=cat.is_public
-            ).put()
-        else:
-            cat.key = Categories(
-                parent=cat.parent,
-                tags=cat.tags,
-                published_time=cat.published_time,
-                is_public=cat.is_public
-            ).put()
 
     def TagsAll(self):
         return [ToTag(t) for t in Tag.all()]

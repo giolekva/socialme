@@ -31,13 +31,8 @@ def check_has_next_page(entries):
 		return 0
 
 
-def AugmentWithTags(entries, db):
+def AugmentWithCommentCounts(entries, db):
         for e in entries:
-                categories = db.CategoriesForEntryWithKey(e.key)
-                if categories:
-                        e.tags = categories.tags
-                else:
-                        e.tags = []
                 e.comments_count = db.CommentsCountForEntryWithKey(e.key)
         return entries
 
@@ -121,7 +116,7 @@ class MainHandler(BaseHandler):
 		page = int(page)
 		entries = self.db.EntriesGetPublic(6, 5 * (page - 1))
 		has_next = check_has_next_page(entries)
-                entries = AugmentWithTags(entries, self.db)
+                entries = AugmentWithCommentCounts(entries, self.db)
 		self.render("index.html",
                             blogs=entries,
                             current_page=page,
@@ -133,9 +128,9 @@ class MainHandler(BaseHandler):
 class TagHandler(BaseHandler):
 	def get(self, tag, page = 1):
 		page = int(page)
-		entries = [self.db.EntriesGetWithKey(cat.parent) for cat in self.db.CategoriesPublicWithTag(tag, 6, 5 * (page - 1))]
+		entries = self.db.EntriesPublicWithTag(tag, 6, 5 * (page - 1))
 		has_next = check_has_next_page(entries)
-                entries = AugmentWithTags(entries, self.db)
+                entries = AugmentWithCommentCounts(entries, self.db)
 		self.render("index.html",
                             blogs=entries,
                             current_page=page,
@@ -160,7 +155,7 @@ class ArchiveHandler(BaseHandler):
 		next = date(year = next_year, month = next_month, day = 1)
 		blogs = self.db.EntriesDateRange(now, next, 6, 5 * (page - 1))
 		has_next = check_has_next_page(blogs)
-                blogs = AugmentWithTags(blogs, self.db)
+                blogs = AugmentWithCommentCounts(blogs, self.db)
 		title = 'არქივი %d %s' % (year, self.settings['months'][int(month)-1].encode('utf-8'))
 		if month < 10:
 			month = '0'+str(month)
@@ -214,7 +209,6 @@ class EntryHandler(BaseHandler):
                                     email=email,
                                     email_md5=email_md5,
                                     comments=comments,
-                                    tags=self.db.CategoriesForEntryWithKey(blog.key).tags,
                                     similar_entries=self.db.EntriesSimilar(blog))
 
 
@@ -256,10 +250,12 @@ def new_entry(db, title, slug, body, tags, published = datetime.now(), updated =
 	blog = Entry(title=title,
                      slug=slug,
                      body=body,
+                     tags=tags,
                      published_time=published,
                      updated_time=updated,
                      is_public=is_public,
                      was_public=was_public)
+	db.EntriesSave(blog)
 	for tag in tags:
 		t = db.TagsGet(tag)
 		if t is None:
@@ -267,28 +263,25 @@ def new_entry(db, title, slug, body, tags, published = datetime.now(), updated =
 		else:
 			t.count = t.count+1
 		db.TagsSave(t)
-	db.EntriesSave(blog)
-	cat = Categories(parent=blog.key,
-                         tags=tags,
-                         published_time=published,
-                         is_public=is_public)
-        db.CategoriesSave(cat)
 	return blog
 
 
 class EditHandler(BaseHandler):
 	def get(self, slug):
 		blog = self.db.EntriesGet(slug)
-                AugmentWithTags([blog], self.db)
+                AugmentWithCommentCounts([blog], self.db)
 		self.render('edit.html', blog = blog, edit_path = '/edit/%s' % slug)
 
 	def post(self, slug):
 		body = self.get_argument('body')
 		title = self.get_argument('title')
+                tags = [tag.strip(' ')
+                        for tag in self.get_argument('tags').split(',')]
 		blog = self.db.EntriesGet(slug)
 		was_public = blog.was_public
 		blog.body = body
 		blog.title = title
+                blog.tags = tags
 		if self.get_argument('save', None):
 			blog.is_public = False
 		else:
@@ -297,10 +290,6 @@ class EditHandler(BaseHandler):
 			blog.is_public = True
 			blog.was_public = True
                 self.db.EntriesSave(blog)
-                # TODO(giolekva): support tag changes
-		cat = self.db.CategoriesForEntryWithKey(blog.key)
-		cat.is_public = blog.is_public
-                self.db.CategoriesSave(cat)
 		if was_public:
 			taskqueue.add(url = '/admin/ping_hub', method = 'GET')
 		self.recalc_archive()
@@ -335,7 +324,7 @@ class AtomHandler(web.RequestHandler):
 	def get(self):
 		self.set_header("Content-Type", "application/atom+xml")
                 db = self.settings['db']
-                entries = AugmentWithTags(db.EntriesGetPublic(10), db)
+                entries = AugmentWithCommentCounts(db.EntriesGetPublic(10), db)
 		self.render("atom.xml", entries=entries)
 
 
@@ -343,7 +332,7 @@ class RSSHandler(web.RequestHandler):
 	def get(self):
 		self.set_header("Content-Type", "application/rss+xml")
                 db = self.settings['db']
-                entries = AugmentWithTags(db.EntriesGetPublic(10), db)
+                entries = AugmentWithCommentCounts(db.EntriesGetPublic(10), db)
 		self.render("rss.xml", entries=entries)
 
 

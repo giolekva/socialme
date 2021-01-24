@@ -1,29 +1,20 @@
 import re
 
 class Entry(object):
-    def __init__(self, key=None, title=None, slug=None, body=None, published_time=None, updated_time=None, is_public=None, was_public=None, tags=None):
+    def __init__(self, key=None, title=None, slug=None, body=None, tags=None, published_time=None, updated_time=None, is_public=None, was_public=None):
         self.key = key
         self.title = title
         self.slug = slug
         self.body = body
+        self.tags = tags
         self.published_time = published_time
         self.updated_time = updated_time
         self.is_public = is_public
         self.was_public = was_public
-        self.tags = tags
 
     def get_paragraphs(self):
 	pattern = re.compile(r'^\s*(?P<line>.*?)\s*$', re.S | re.M | re.X)
 	return pattern.sub('<p>\g<line></p>', self.body)
-
-
-class Categories(object):
-    def __init__(self, parent=None, key=None, tags=None, is_public=None, published_time=None):
-        self.parent = parent
-        self.key = key
-	self.tags = tags
-	self.is_public = is_public
-	self.published_time = published_time
 
 
 class Tag(object):
@@ -69,19 +60,13 @@ class DB(object):
     def EntriesDateRange(self, begin, end, count, after=None):
         raise NotImplementedError
 
+    def EntriesPublicWithTag(self, tag, count, after=0):
+        raise NotImplementedError
+
     def EntriesGetPublishedTimes(self):
         raise NotImplementedError
 
     def EntriesSave(self, entry):
-        raise NotImplementedError
-
-    def CategoriesPublicWithTag(self, tag, count, after=None):
-        raise NotImplementedError
-
-    def CategoriesForEntryWithKey(self, key):
-        raise NotImplementedError
-
-    def CategoriesSave(self, cat):
         raise NotImplementedError
 
     def TagsAll(self):
@@ -109,24 +94,22 @@ class DB(object):
         raise NotImplementedError
 
     def EntriesSimilar(self, entry):
-        tags = []
-	categories = self.CategoriesForEntryWithKey(entry.key)
-        if categories:
-            tags = categories.tags
-	entries = {}
-	for tag in tags:
-	    categories = self.CategoriesPublicWithTag(tag, 1000, 0)
-	    for cat in categories:
-		if cat.key in entries:
-		    entries[cat.key] += 1
+	counts = {}
+        entries = {}
+	for tag in entry.tags:
+	    tagged_entries = self.EntriesPublicWithTag(tag, 1000, 0)
+	    for e in tagged_entries:
+		if e.key in counts:
+		    counts[e.key] += 1
 		else:
-                    entries[cat.key] = 1
+                    counts[e.key] = 1
+                    entries[e.key] = e
         res = [None, None, None]
 	cnt = [0, 0, 0]
-	for key in entries:
-	    if key.parent() == entry.key:
+	for key in counts:
+	    if key == entry.key:
 		continue
-	    k = entries[key]
+	    k = counts[key]
 	    for i in range(0, 3):
 		if res[i] is None:
 		    res[i] = key
@@ -142,4 +125,4 @@ class DB(object):
         for i in range(2, -1, -1):
 	    if res[i] is None:
 	        del res[i]
-        return [self.EntriesGetWithKey(key.parent()) for key in res]
+        return [entries[key] for key in res]

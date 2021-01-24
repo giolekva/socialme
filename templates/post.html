@@ -16,7 +16,7 @@
 	<footer>
 		<span style="float: left; font-weight: bold;">ტეგები:</span>
 		<ul class="tags">
-			{% for tag in tags %}
+			{% for tag in blog.tags %}
 			<li><a href="/tag/{{ tag }}" rel="tag">{{ tag }}</a></li>
 			{% end %}
 		</ul>
