@@ -5,7 +5,6 @@ from xml import sax
 
 from tornado import web
 
-import datastore
 from db import *
 import smileys
 
@@ -86,7 +85,7 @@ class BaseHandler(web.RequestHandler):
                 archive.sort(reverse=True, key=lambda a: a.year * 12 + a.month)
                 res = self.render_string('archive.html', arch=archive)
 		self.cache.set('archive', res)
-                return rendered
+                return res
 
 	def make_smile(self, text):
 		return smileys.make_smile(text)
@@ -465,9 +464,8 @@ class ImportHandler(web.RequestHandler):
 class ImportJsonHandler(web.RequestHandler):
         def get(self):
                 import json
-                from db import *
+                from db import Comment
                 from datetime import datetime
-                from time import sleep
                 entries = None
                 with open('articles.json', mode='r') as inp:
                         entries = json.loads(inp.read())
@@ -482,7 +480,6 @@ class ImportJsonHandler(web.RequestHandler):
                                           published_time=pubdate,
                                           is_public=True,
                                           was_public=True)
-                        # sleep(1)
                         thread = []
                         for c in e['Comments']:
                                 parent = None
@@ -500,5 +497,4 @@ class ImportJsonHandler(web.RequestHandler):
                                         parent_comment=parent,
                                         published_time=datetime.strptime(c['PubDate'], '%Y-%m-%dT%H:%M:%SZ'),)
                                 db.CommentsSave(comment)
-                                # sleep(0.1)
                                 thread.append({'Comment': comment, 'Margin': c['Margin']})
