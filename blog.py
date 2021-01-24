@@ -8,15 +8,6 @@ from tornado import web
 from db import *
 import smileys
 
-from pubsubhubbub_publish import *
-
-
-class Archive(object):
-    def __init__(self, year, month, count):
-	self.year = year
-	self.month = month
-	self.count = count
-
 
 def check_has_next_page(entries):
 	if len(entries) == 6:

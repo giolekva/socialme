@@ -119,3 +119,10 @@ class DB(object):
 	    if res[i] is None:
 	        del res[i]
         return [entries[key] for key in res]
+
+
+class Archive(object):
+    def __init__(self, year, month, count):
+	self.year = year
+	self.month = month
+	self.count = count
