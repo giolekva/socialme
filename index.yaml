@@ -42,13 +42,13 @@ indexes:
 - kind: Entry
   properties:
   - name: is_public
-  - name: tags
+  - name: published_time
+    direction: desc
 
 - kind: Entry
   properties:
   - name: is_public
-  - name: published_time
-    direction: desc
+  - name: tags
 
 - kind: Entry
   properties:

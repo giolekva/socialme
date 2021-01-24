@@ -15,13 +15,13 @@ class Entry(ds.Model):
 
 
 class Comment(ds.Model):
-    entry = ds.ReferenceProperty(Entry, collection_name = 'comments')
+    entry = ds.ReferenceProperty(Entry)
     name = ds.StringProperty(required = True)
     link = ds.LinkProperty(required = False)
     email = ds.EmailProperty(required = True)
     email_md5 = ds.StringProperty(required = True)
     comment = ds.TextProperty(required = True)
-    parent_comment = ds.SelfReferenceProperty(required = False, collection_name = 'child_comments')
+    parent_comment = ds.SelfReferenceProperty(required = False)
     published = ds.DateTimeProperty(auto_now_add = True)
 
 
