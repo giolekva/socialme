@@ -14,11 +14,6 @@ class Entry(ds.Model):
     was_public = ds.BooleanProperty()
 
 
-class Tag(ds.Model):
-    name = ds.StringProperty(required = True)
-    count = ds.IntegerProperty()
-
-
 class Comment(ds.Model):
     entry = ds.ReferenceProperty(Entry, collection_name = 'comments')
     name = ds.StringProperty(required = True)
@@ -43,16 +38,6 @@ def ToEntry(e):
     r.updated_time = e.updated_time
     r.is_public = e.is_public
     r.was_public = e.was_public
-    return r
-
-
-def ToTag(t):
-    if t is None:
-        return None
-    r = db.Tag()
-    r.key = t.key()
-    r.name = t.name
-    r.count = t.count
     return r
 
 
@@ -110,13 +95,15 @@ class Datastore(db.DB):
         ).put()
 
     def TagsAll(self):
-        return [ToTag(t) for t in Tag.all()]
-
-    def TagsGet(self, tag):
-        return ToTag(Tag.all().filter('name =', tag).get())
-
-    def TagsSave(self, tag):
-        tag.key = Tag(key=tag.key, name=tag.name, count=tag.count).put()
+        q = ds.GqlQuery('SELECT tags FROM Entry WHERE is_public = :1', True)
+        counts = {}
+        for entry in q:
+            for tag in entry.tags:
+                if tag in counts:
+                    counts[tag] += 1
+                else:
+                    counts[tag] = 1
+        return [db.Tag(tag, count) for (tag, count) in counts.items()]
 
     def Comments(self, count):
         comments = Comment.all().order('-published').fetch(count)

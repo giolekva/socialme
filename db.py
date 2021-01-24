@@ -18,8 +18,7 @@ class Entry(object):
 
 
 class Tag(object):
-    def __init__(self, key=None, name=None, count=None):
-        self.key = key
+    def __init__(self, name=None, count=None):
 	self.name = name
 	self.count = count
 
@@ -70,12 +69,6 @@ class DB(object):
         raise NotImplementedError
 
     def TagsAll(self):
-        raise NotImplementedError
-
-    def TagsGet(self, name):
-        raise NotImplementedError
-
-    def TagsSave(self, tag):
         raise NotImplementedError
 
     def Comments(self, count):

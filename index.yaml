@@ -42,6 +42,11 @@ indexes:
 - kind: Entry
   properties:
   - name: is_public
+  - name: tags
+
+- kind: Entry
+  properties:
+  - name: is_public
   - name: published_time
     direction: desc
 

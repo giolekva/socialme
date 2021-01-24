@@ -56,6 +56,7 @@ class NewCommentNotificationHandler(web.RequestHandler):
 		if status_code != xmpp.NO_ERROR:
 			taskqueue.add(url = '/admin/new_comment', method = 'GET')
 
+
 class BaseHandler(web.RequestHandler):
         @property
         def db(self):
@@ -256,13 +257,6 @@ def new_entry(db, title, slug, body, tags, published = datetime.now(), updated =
                      is_public=is_public,
                      was_public=was_public)
 	db.EntriesSave(blog)
-	for tag in tags:
-		t = db.TagsGet(tag)
-		if t is None:
-			t = Tag(name=tag, count=1)
-		else:
-			t.count = t.count+1
-		db.TagsSave(t)
 	return blog
 
 
