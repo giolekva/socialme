@@ -4,25 +4,25 @@ from google.appengine.ext import db as ds
 
 
 class Entry(ds.Model):
-    title = ds.StringProperty(required = True)
-    slug = ds.StringProperty(required = True)
-    body = ds.TextProperty(required = True)
+    title = ds.StringProperty(required=True)
+    slug = ds.StringProperty(required=True)
+    body = ds.TextProperty(required=True)
     tags = ds.StringListProperty()
-    published_time = ds.DateTimeProperty(auto_now_add = True)
-    updated_time = ds.DateTimeProperty(auto_now = True)
+    published_time = ds.DateTimeProperty(auto_now_add=True)
+    updated_time = ds.DateTimeProperty(auto_now=True)
     is_public = ds.BooleanProperty()
     was_public = ds.BooleanProperty()
 
 
 class Comment(ds.Model):
     entry = ds.ReferenceProperty(Entry)
-    name = ds.StringProperty(required = True)
-    link = ds.LinkProperty(required = False)
-    email = ds.EmailProperty(required = True)
-    email_md5 = ds.StringProperty(required = True)
-    comment = ds.TextProperty(required = True)
-    parent_comment = ds.SelfReferenceProperty(required = False)
-    published_time = ds.DateTimeProperty(auto_now_add = True)
+    name = ds.StringProperty(required=True)
+    link = ds.LinkProperty(required=False)
+    email = ds.EmailProperty(required=True)
+    email_md5 = ds.StringProperty(required=True)
+    comment = ds.TextProperty(required=True)
+    parent_comment = ds.SelfReferenceProperty(required=False)
+    published_time = ds.DateTimeProperty(auto_now_add=True)
 
 
 def ToEntry(e):
@@ -60,25 +60,43 @@ def ToComment(c):
 
 class Datastore(db.DB):
     def EntriesGet(self, slug):
-        return ToEntry(Entry.all().filter('slug =', slug).get())
+        return ToEntry(Entry.all().filter("slug =", slug).get())
 
     def EntriesGetWithKey(self, key):
         return ToEntry(Entry.get(key))
 
     def EntriesGetPublic(self, count, after=0):
-        entries = Entry.all().filter('is_public =', True).order('-published_time').fetch(count, after)
+        entries = (
+            Entry.all()
+            .filter("is_public =", True)
+            .order("-published_time")
+            .fetch(count, after)
+        )
         return [ToEntry(e) for e in entries]
 
     def EntriesDateRange(self, begin, end, count, after=0):
-        entries = Entry.all().filter('published_time >=', begin).filter('published_time <', end).filter('is_public =', True).order('-published_time').fetch(count, after)
+        entries = (
+            Entry.all()
+            .filter("published_time >=", begin)
+            .filter("published_time <", end)
+            .filter("is_public =", True)
+            .order("-published_time")
+            .fetch(count, after)
+        )
         return [ToEntry(e) for e in entries]
 
     def EntriesPublicWithTag(self, tag, count, after=0):
-        entries = Entry.all().filter('tags =', tag).filter('is_public =', True).order('-published_time').fetch(count, after)
+        entries = (
+            Entry.all()
+            .filter("tags =", tag)
+            .filter("is_public =", True)
+            .order("-published_time")
+            .fetch(count, after)
+        )
         return [ToEntry(e) for e in entries]
 
     def EntriesGetPublishedTimes(self):
-        q = ds.GqlQuery('SELECT published_time FROM Entry WHERE is_public = :1', True)
+        q = ds.GqlQuery("SELECT published_time FROM Entry WHERE is_public = :1", True)
         return [e.published_time for e in q]
 
     def EntriesSave(self, entry):
@@ -91,11 +109,11 @@ class Datastore(db.DB):
             published_time=entry.published_time,
             updated_time=entry.updated_time,
             is_public=entry.is_public,
-            was_public=entry.was_public
+            was_public=entry.was_public,
         ).put()
 
     def TagsAll(self):
-        q = ds.GqlQuery('SELECT tags FROM Entry WHERE is_public = :1', True)
+        q = ds.GqlQuery("SELECT tags FROM Entry WHERE is_public = :1", True)
         counts = {}
         for entry in q:
             for tag in entry.tags:
@@ -106,14 +124,14 @@ class Datastore(db.DB):
         return [db.Tag(tag, count) for (tag, count) in counts.items()]
 
     def Comments(self, count):
-        comments = Comment.all().order('-published_time').fetch(count)
+        comments = Comment.all().order("-published_time").fetch(count)
         return [ToComment(c) for c in comments]
 
     def CommentsGet(self, key):
         return ToComment(Comment.get(key))
 
     def CommentsForEntryWithKey(self, key):
-        comments = Comment.all().ancestor(key).order('published_time')
+        comments = Comment.all().ancestor(key).order("published_time")
         return [ToComment(c) for c in comments]
 
     def CommentsCountForEntryWithKey(self, key):
@@ -136,7 +154,7 @@ class Datastore(db.DB):
                 email_md5=com.email_md5,
                 comment=com.comment,
                 parent_comment=parent_comment_key,
-                published_time=com.published_time
+                published_time=com.published_time,
             ).put()
         else:
             com.key = Comment(
