@@ -28,12 +28,6 @@ def CreateSqliteConn(db_path):
 
 def SetupServer(db):
     handlers = [
-        # LAST.FM
-        # (r'/lastfm/api/toptracks$', TopTracksHandler),
-        # (r'/lastfm/api/topalbums$', TopAlbumsHandler),
-        # (r'/lastfm/api/topartists$', TopArtistsHandler),
-        # (r'/lastfm$', LastFMHandler),
-        # BLOG
         (r"/import_json$", ImportJsonHandler),
         (r"/import$", ImportHandler),
         (r"/edit/([^/]+)$", EditHandler),
@@ -72,8 +66,6 @@ def SetupServer(db):
             u"დეკემბერი",
         ),
         blogger_id="8574388056364017758",
-        lastfm_api_key="your api key",
-        lastfm_user="lastfm username",
         debug=True,
         db=db,
     )

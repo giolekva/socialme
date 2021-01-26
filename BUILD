@@ -10,7 +10,6 @@ py_library(
     srcs = [
         "blog.py",
         "db.py",
-        "lastfm.py",
         "smileys.py",
     ],
     deps = [

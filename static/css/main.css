@@ -7,31 +7,31 @@ header, section, footer, aside, nav, article, figure {
     display: block;
 }
 
-/***** Global *****/  
-/* Body */  
-body {  
+/***** Global *****/
+/* Body */
+body {
     background: #F5F4EF;
-    color: #000305;  
-    font-size: 87.5%; /* Base font size: 14px */  
-    font-family: 'Trebuchet MS', Trebuchet, 'Lucida Sans Unicode', 'Lucida  Grande', 'Lucida Sans', Arial, sans-serif;  
-    line-height: 1.429;  
-    margin: 0;  
+    color: #000305;
+    font-size: 87.5%; /* Base font size: 14px */
+    font-family: 'Trebuchet MS', Trebuchet, 'Lucida Sans Unicode', 'Lucida  Grande', 'Lucida Sans', Arial, sans-serif;
+    line-height: 1.429;
+    margin: 0;
     padding: 0;
-    text-align: left;  
+    text-align: left;
 }
 
 /* Headings */
 h1 {font-size: 1.713em;} /* 24px */
 h2 {font-size: 1.571em;} /* 22px */
-h3 {font-size: 1.429em;} /* 20px */ 
+h3 {font-size: 1.429em;} /* 20px */
 h4 {font-size: 1.286em;} /* 18px */
 h5 {font-size: 1.143em;} /* 16px */
 h6 {font-size: 1em;} /* 14px */
 
-h2, h3, h4, h5, h6 {  
-    font-weight: 400;  
-    line-height: 1.1;  
-    margin-bottom: .8em;  
+h2, h3, h4, h5, h6 {
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: .8em;
 }
 
 /* Anchors */
@@ -95,7 +95,7 @@ table {margin: .5em auto 1.5em auto; width: 98%;}
     /* Thead */
     thead th {padding: .5em .4em; text-align: left;}
     thead td {}
-    
+
     /* Tbody */
     tbody td {padding: .5em .4em;}
     tbody th {}
@@ -130,7 +130,7 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
     padding: 0;
     text-align: center;
     width: 1000px;
-    
+
     border-radius: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
@@ -157,7 +157,7 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
     border-top-left-radius: 10px;
     -moz-border-radius-topleft: 10px;
     -webkit-border-top-left-radius: 10px;
-    
+
     border-bottom-left-radius: 10px;
 	-moz-border-radius-bottomleft: 10px;
     -webkit-border-bottom-left-radius: 10px;
@@ -167,7 +167,7 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
     border-top-right-radius: 10px;
     -moz-border-radius-topright: 10px;
     -webkit-border-top-right-radius: 10px;
-    
+
     border-bottom-right-radius: 10px;
 	-moz-border-radius-bottomright: 10px;
     -webkit-border-bottom-right-radius: 10px;
@@ -178,7 +178,7 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
     margin: 0 auto;
 }
 
-/***** Content *****/  
+/***** Content *****/
 #content {
     background: #fff;
     margin-bottom: 2em;
@@ -186,7 +186,7 @@ img.left, figure.left {float: right; margin: 0 0 2em 2em;}
     padding: 10px;
     width: 640px;
     float: left;
-    
+
     border-radius: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
@@ -220,7 +220,7 @@ li:last-child .hentry, #content > .hentry {border: 0; margin: 0;}
 		top: 1.5em;
 		width: 190px;
 	} */
-    
+
 /*    #posts-list .hentry:hover {
         background: #C64350;
         color: #fff;
@@ -229,7 +229,7 @@ li:last-child .hentry, #content > .hentry {border: 0; margin: 0;}
         color: #F6CF74;
         text-shadow: 1px 1px 1px #333;
     } */
-    
+
     /* Tags */
     div.tags { display: inline; }
     ul.tags li { display: inline; }
@@ -242,7 +242,7 @@ li:last-child .hentry, #content > .hentry {border: 0; margin: 0;}
     padding: 10px;
     width: 300px;
     float: right;
-    
+
     border-radius: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
@@ -301,9 +301,9 @@ article.comment {
 	height: 80px;
 	padding: 5px 5px;
 	margin-right: 10px;
-	
+
 	float: left;
-	
+
 	border-radius: 10px;
     -moz-border-radius: 10px;
     -webkit-border-radius: 10px;
@@ -322,12 +322,6 @@ article.comment {
 .year {
 	font-size: 1.2em;
 	text-align: center;
-}
-
-/* last.fm */
-.charts li {
-	float: left;
-	padding-right: 10px;
 }
 
 /* smileys */
