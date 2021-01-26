@@ -1,20 +1,39 @@
-﻿import os
+﻿# coding=UTF-8
 
-from tornado.wsgi import WSGIApplication
+from datetime import datetime
+import time
+import os
+import sqlite3
 
-import datastore
-import memcache
+import tornado.ioloop
+import tornado.web
+
+import sqlite
+import cache
 from blog import *
-from lastfm import *
 
 
-def SetupServer():
+def DatetimeToTimestamp(ts):
+    return time.mktime(ts.timetuple())
+
+
+def CreateSqliteConn(db_path):
+    sqlite3.register_adapter(datetime, DatetimeToTimestamp)
+    conn = sqlite3.connect(db_path)
+    try:
+        sqlite.CreateTables(conn)
+    except:
+        pass
+    return conn
+
+
+def SetupServer(db, cache):
     handlers = [
         # LAST.FM
-        (r"/lastfm/api/toptracks$", TopTracksHandler),
-        (r"/lastfm/api/topalbums$", TopAlbumsHandler),
-        (r"/lastfm/api/topartists$", TopArtistsHandler),
-        (r"/lastfm$", LastFMHandler),
+        # (r'/lastfm/api/toptracks$', TopTracksHandler),
+        # (r'/lastfm/api/topalbums$', TopAlbumsHandler),
+        # (r'/lastfm/api/topartists$', TopArtistsHandler),
+        # (r'/lastfm$', LastFMHandler),
         # BLOG
         (r"/import_json$", ImportJsonHandler),
         (r"/import$", ImportHandler),
@@ -57,10 +76,18 @@ def SetupServer():
         lastfm_api_key="your api key",
         lastfm_user="lastfm username",
         debug=True,
-        db=datastore.Datastore(),
-        cache=memcache.Memcache(),
+        db=db,
+        cache=cache,
     )
-    return WSGIApplication(handlers, **settings)
+    return tornado.web.Application(handlers, **settings)
 
 
-app = SetupServer()
+def Main():
+    conn = CreateSqliteConn("socialme.db")
+    app = SetupServer(sqlite.DB(conn), cache.NoCache())
+    app.listen(8081)
+    tornado.ioloop.IOLoop.current().start()
+
+
+if __name__ == "__main__":
+    Main()

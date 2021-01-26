@@ -11,7 +11,7 @@
 	</div>
 	<header><h2 class="entry-title">{{ blog.title }}</h2></header>
 	<div class="entry-content">
-		{{ handler.make_smile(blog.body) }}
+		{% raw handler.make_smile(blog.body) %}
 	</div>
 	<footer>
 		<span style="float: left; font-weight: bold;">ტეგები:</span>
@@ -44,7 +44,7 @@
 					{% if item['comment'].link %}<a href="{{ item['comment'].link }}" itemprop="url">{{ item['comment'].name }}</a> {% else %}<span itemprop="nickname">{{ item['comment'].name }}</span>{% end %}
 				</div>
 			</span>
-			<span>{{ handler.make_smile(handler.paragraphs(item['comment'].comment)) }}</span>
+			<span>{% raw handler.make_smile(handler.paragraphs(item['comment'].comment)) %}</span>
 		</article>
 		{% end %}
 	</div>

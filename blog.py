@@ -131,8 +131,8 @@ class ArchiveHandler(BaseHandler):
         if next_month == 13:
             next_month = 1
             next_year += 1
-        now = date(year=year, month=month, day=1)
-        next = date(year=next_year, month=next_month, day=1)
+        now = datetime(year=year, month=month, day=1)
+        next = datetime(year=next_year, month=next_month, day=1)
         blogs = self.db.EntriesDateRange(now, next, 6, 5 * (page - 1))
         has_next = check_has_next_page(blogs)
         blogs = AugmentWithCommentCounts(blogs, self.db)
@@ -402,11 +402,9 @@ class CommentsHandler(sax.handler.ContentHandler):
                 comment=self.comment,
             )
             com.put()
-            print "imported"
         elif name == "published":
             self.is_published = 0
             if self.is_entry:
-                print self.content.encode("utf-8")
                 self.published_time = to_date(self.content)
         elif name == "content":
             self.is_content = 0

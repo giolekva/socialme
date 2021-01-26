@@ -14,7 +14,7 @@
 				</div>
 				<header><h2 class="entry-title"><a href="/{{ blog.slug }}" rel="bookmark" title="{{ blog.title }}">{{ blog.title }}</a></h2></header>
 				<div class="entry-content">
-					{{ handler.make_smile(blog.body) }}
+					{% raw handler.make_smile(blog.body) %}
 				</div>
 				<footer>
 					<span style="float: left; font-weight: bold;">ტეგები:</span>
