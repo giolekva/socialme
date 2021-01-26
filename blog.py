@@ -28,41 +28,15 @@ class BaseHandler(web.RequestHandler):
     def db(self):
         return self.settings["db"]
 
-    @property
-    def cache(self):
-        return self.settings["cache"]
-
     def get_comments(self):
-        res = self.cache.get("comments")
-        if res is None:
-            res = self.recalc_comments()
-        return res
-
-    def recalc_comments(self):
         comments = self.db.Comments(3)
-        res = self.render_string("last_comments.html", comments=comments)
-        self.cache.set("comments", res)
-        return res
+        return self.render_string("last_comments.html", comments=comments)
 
     def get_tags(self):
-        res = self.cache.get("tags")
-        if res is None:
-            res = self.recalc_tags()
-        return res
-
-    def recalc_tags(self):
         tags = self.db.TagsAll()
-        res = self.render_string("tag_cloud.html", tags=tags)
-        self.cache.set("tags", res)
-        return res
+        return self.render_string("tag_cloud.html", tags=tags)
 
     def get_archive(self):
-        res = self.cache.get("archive")
-        if res is None:
-            res = self.recalc_archive()
-        return res
-
-    def recalc_archive(self):
         published_times = self.db.EntriesGetPublishedTimes()
         counts = {}
         for p in published_times:
@@ -75,9 +49,7 @@ class BaseHandler(web.RequestHandler):
             Archive(year=c[0][0], month=c[0][1], count=c[1]) for c in counts.items()
         ]
         archive.sort(reverse=True, key=lambda a: a.year * 12 + a.month)
-        res = self.render_string("archive.html", arch=archive)
-        self.cache.set("archive", res)
-        return res
+        return self.render_string("archive.html", arch=archive)
 
     def make_smile(self, text):
         return smileys.make_smile(text)

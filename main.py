@@ -9,7 +9,6 @@ import tornado.ioloop
 import tornado.web
 
 import sqlite
-import cache
 from blog import *
 
 
@@ -27,7 +26,7 @@ def CreateSqliteConn(db_path):
     return conn
 
 
-def SetupServer(db, cache):
+def SetupServer(db):
     handlers = [
         # LAST.FM
         # (r'/lastfm/api/toptracks$', TopTracksHandler),
@@ -77,14 +76,13 @@ def SetupServer(db, cache):
         lastfm_user="lastfm username",
         debug=True,
         db=db,
-        cache=cache,
     )
     return tornado.web.Application(handlers, **settings)
 
 
 def Main():
     conn = CreateSqliteConn("socialme.db")
-    app = SetupServer(sqlite.DB(conn), cache.NoCache())
+    app = SetupServer(sqlite.DB(conn))
     app.listen(8081)
     tornado.ioloop.IOLoop.current().start()
 
