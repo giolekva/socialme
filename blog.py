@@ -9,7 +9,7 @@ from db import *
 import smileys
 
 
-def check_has_next_page(entries):
+def CheckHasNextPage(entries):
     if len(entries) == 6:
         del entries[5]
         return 1
@@ -63,7 +63,7 @@ class MainHandler(BaseHandler):
     def get(self, page=1):
         page = int(page)
         entries = self.db.EntriesGetPublic(6, 5 * (page - 1))
-        has_next = check_has_next_page(entries)
+        has_next = CheckHasNextPage(entries)
         entries = AugmentWithCommentCounts(entries, self.db)
         self.render(
             "index.html",
@@ -79,7 +79,7 @@ class TagHandler(BaseHandler):
     def get(self, tag, page=1):
         page = int(page)
         entries = self.db.EntriesPublicWithTag(tag, 6, 5 * (page - 1))
-        has_next = check_has_next_page(entries)
+        has_next = CheckHasNextPage(entries)
         entries = AugmentWithCommentCounts(entries, self.db)
         self.render(
             "index.html",
@@ -106,7 +106,7 @@ class ArchiveHandler(BaseHandler):
         now = datetime(year=year, month=month, day=1)
         next = datetime(year=next_year, month=next_month, day=1)
         blogs = self.db.EntriesDateRange(now, next, 6, 5 * (page - 1))
-        has_next = check_has_next_page(blogs)
+        has_next = CheckHasNextPage(blogs)
         blogs = AugmentWithCommentCounts(blogs, self.db)
         title = "არქივი %d %s" % (
             year,
@@ -220,11 +220,10 @@ class PostComment(BaseHandler):
                 )
             self.db.CommentsSave(comment)
             self.set_cookie("whoami", str(comment.key))
-            self.recalc_comments()
             self.redirect("/%s" % blog.slug)
 
 
-def new_entry(
+def SaveNewEntry(
     db,
     title,
     slug,
@@ -273,8 +272,6 @@ class EditHandler(BaseHandler):
             blog.is_public = True
             blog.was_public = True
         self.db.EntriesSave(blog)
-        self.recalc_archive()
-        self.recalc_tags()
         self.redirect("/%s" % blog.slug)
 
 
@@ -297,11 +294,9 @@ class NewEntryHandler(BaseHandler):
             is_public = True
             was_public = True
         tags = [tag.strip(" ") for tag in self.get_argument("tags").split(",")]
-        blog = new_entry(
+        blog = SaveNewEntry(
             self.db, title, slug, body, tags, is_public=is_public, was_public=was_public
         )
-        self.recalc_archive()
-        self.recalc_tags()
         self.redirect("/%s" % blog.slug)
 
 
@@ -442,7 +437,7 @@ class EntriesHandler(sax.handler.ContentHandler):
     def endElement(self, name):
         if name == "entry":
             self.is_entry = 0
-            blog = new_entry(
+            blog = SaveNewEntry(
                 self.db,
                 self.title,
                 self.title,
@@ -500,10 +495,10 @@ class ImportJsonHandler(web.RequestHandler):
         db = self.settings["db"]
         for e in entries:
             pubdate = datetime.strptime(e["PubDate"], "%Y-%m-%dT%H:%M:%SZ")
-            entry = new_entry(
+            entry = SaveNewEntry(
                 db,
                 e["Title"],
-                e["Url"][e["Url"].rfind("/") + 1 :],
+                e["Slug"],
                 e["Content"],
                 e["Tags"],
                 published_time=pubdate,

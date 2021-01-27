@@ -71,7 +71,6 @@ class Comment(object):
             m.update(self.comment.encode("UTF-8"))
             if self.parent_comment:
                 m.update(self.parent_comment.key.encode("UTF-8"))
-            print(str(datetime.timestamp(self.published_time)))
             m.update(str(datetime.timestamp(self.published_time)).encode("UTF-8"))
             self._md5 = m.hexdigest()
         return self._md5
