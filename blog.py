@@ -110,7 +110,7 @@ class ArchiveHandler(BaseHandler):
         blogs = AugmentWithCommentCounts(blogs, self.db)
         title = "არქივი %d %s" % (
             year,
-            self.settings["months"][int(month) - 1].encode("utf-8"),
+            self.settings["months"][int(month) - 1],
         )
         if month < 10:
             month = "0" + str(month)
