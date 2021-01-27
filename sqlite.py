@@ -95,7 +95,7 @@ class DB(db.DB):
     def EntriesGetPublic(self, count, after=None):
         c = self.conn.cursor()
         c.execute(
-            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? LIMIT ?",
+            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? ORDER BY published_time DESC LIMIT ?",
             (
                 True,
                 count,
@@ -106,7 +106,7 @@ class DB(db.DB):
     def EntriesDateRange(self, begin, end, count, after=None):
         c = self.conn.cursor()
         c.execute(
-            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND ? <= published_time AND published_time < ? LIMIT ?",
+            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND ? <= published_time AND published_time < ? ORDER BY published_time DESC LIMIT ?",
             (
                 True,
                 datetime.timestamp(begin),
@@ -119,7 +119,7 @@ class DB(db.DB):
     def EntriesPublicWithTag(self, tag, count, after=0):
         c = self.conn.cursor()
         c.execute(
-            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND instr(tags, ?) > 0 LIMIT ?",
+            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND instr(tags, ?) > 0 ORDER BY published_time DESC LIMIT ?",
             (
                 True,
                 tag,

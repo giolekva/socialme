@@ -9,7 +9,6 @@ py_library(
     name = "core",
     srcs = [
         "blog.py",
-        "db.py",
         "smileys.py",
     ],
     deps = [

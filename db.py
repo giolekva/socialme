@@ -1,3 +1,5 @@
+from datetime import datetime
+import hashlib
 import re
 
 
@@ -58,15 +60,21 @@ class Comment(object):
         self.parent_comment = parent_comment
         self.published_time = published_time
 
-    def __repr__(self):
-        ret = "{" + str(self.key)
-        if self.parent_comment:
-            ret += " , " + str(self.parent_comment.key)
-            ret += "}"
-        return ret
-
-    def __str__(self):
-        return self.__repr__()
+    def md5(self):
+        if not hasattr(self, "_md5"):
+            m = hashlib.md5()
+            m.update(self.entry.key.encode("UTF-8"))
+            m.update(self.name.encode("UTF-8"))
+            if self.link:
+                m.update(self.link.encode("UTF-8"))
+            m.update(self.email_md5.encode("UTF-8"))
+            m.update(self.comment.encode("UTF-8"))
+            if self.parent_comment:
+                m.update(self.parent_comment.key.encode("UTF-8"))
+            print(str(datetime.timestamp(self.published_time)))
+            m.update(str(datetime.timestamp(self.published_time)).encode("UTF-8"))
+            self._md5 = m.hexdigest()
+        return self._md5
 
 
 class Archive(object):
