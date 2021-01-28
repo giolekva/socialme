@@ -1,9 +1,7 @@
 ﻿# coding=UTF-8
 
-from datetime import datetime
 import time
 import os
-import sqlite3
 
 import tornado.ioloop
 import tornado.web
@@ -12,23 +10,8 @@ import sqlite
 from blog import *
 
 
-def DatetimeToTimestamp(ts):
-    return time.mktime(ts.timetuple())
-
-
-def CreateSqliteConn(db_path):
-    sqlite3.register_adapter(datetime, DatetimeToTimestamp)
-    conn = sqlite3.connect(db_path)
-    try:
-        sqlite.CreateTables(conn)
-    except:
-        pass
-    return conn
-
-
 def SetupServer(db):
     handlers = [
-        (r"/import_json$", ImportJsonHandler),
         (r"/import$", ImportHandler),
         (r"/edit/([^/]+)$", EditHandler),
         (r"/edit$", NewEntryHandler),
@@ -73,8 +56,8 @@ def SetupServer(db):
 
 
 def Main():
-    conn = CreateSqliteConn("socialme.db")
-    app = SetupServer(sqlite.DB(conn))
+    db = sqlite.OpenDB("socialme.db")
+    app = SetupServer(db)
     app.listen(8081)
     tornado.ioloop.IOLoop.current().start()
 

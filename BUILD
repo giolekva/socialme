@@ -40,3 +40,12 @@ py_binary(
         ":sqlite",
     ],
 )
+
+py_binary(
+    name = "import_json",
+    srcs = ["import_json.py"],
+    deps = [
+        ":db",
+        ":sqlite",
+    ],
+)

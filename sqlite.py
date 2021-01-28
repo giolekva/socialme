@@ -1,4 +1,5 @@
 from datetime import datetime
+import sqlite3
 
 import db
 
@@ -35,6 +36,24 @@ def CreateTables(conn):
     c.execute(_CREATE_ENTRY_TABLE)
     c.execute(_CREATE_COMMENT_TABLE)
     conn.commit()
+
+
+def DatetimeToTimestamp(ts):
+    return ts.timestamp()
+
+
+def CreateSqliteConn(db_path):
+    sqlite3.register_adapter(datetime, DatetimeToTimestamp)
+    conn = sqlite3.connect(db_path)
+    try:
+        CreateTables(conn)
+    except:
+        pass
+    return conn
+
+
+def OpenDB(db_path):
+    return DB(CreateSqliteConn(db_path))
 
 
 def ToEntry(r):
