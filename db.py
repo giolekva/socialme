@@ -68,7 +68,6 @@ class Comment(object):
             self._email_md5 = m.hexdigest()
         return self._email_md5
 
-
     @property
     def key(self):
         if not hasattr(self, "_key"):
