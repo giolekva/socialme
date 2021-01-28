@@ -8,7 +8,6 @@ class Entry(object):
         self,
         key=None,
         title=None,
-        slug=None,
         body=None,
         tags=None,
         published_time=None,
@@ -18,7 +17,6 @@ class Entry(object):
     ):
         self.key = key
         self.title = title
-        self.slug = slug
         self.body = body
         self.tags = tags
         self.published_time = published_time
@@ -50,18 +48,30 @@ class Comment(object):
         parent_comment=None,
         published_time=None,
     ):
-        self.key = key
+        if key:
+            self._key = key
         self.entry = entry
         self.name = name
         self.link = link
         self.email = email
-        self.email_md5 = email_md5
+        if email_md5:
+            self._email_md5 = email_md5
         self.comment = comment
         self.parent_comment = parent_comment
         self.published_time = published_time
 
-    def md5(self):
-        if not hasattr(self, "_md5"):
+    @property
+    def email_md5(self):
+        if not hasattr(self, "_email_md5"):
+            m = hashlib.md5()
+            m.update(self.email)
+            self._email_md5 = m.hexdigest()
+        return self._email_md5
+
+
+    @property
+    def key(self):
+        if not hasattr(self, "_key"):
             m = hashlib.md5()
             m.update(self.entry.key.encode("UTF-8"))
             m.update(self.name.encode("UTF-8"))
@@ -72,8 +82,8 @@ class Comment(object):
             if self.parent_comment:
                 m.update(self.parent_comment.key.encode("UTF-8"))
             m.update(str(datetime.timestamp(self.published_time)).encode("UTF-8"))
-            self._md5 = m.hexdigest()
-        return self._md5
+            self._key = m.hexdigest()
+        return self._key
 
 
 class Archive(object):
@@ -84,10 +94,7 @@ class Archive(object):
 
 
 class DB(object):
-    def EntriesGet(self, slug):
-        raise NotImplementedError
-
-    def EntriesGetWithKey(self, key):
+    def EntriesGet(self, key):
         raise NotImplementedError
 
     def EntriesGetPublic(self, count, after=None):
@@ -111,7 +118,7 @@ class DB(object):
     def Comments(self, count):
         raise NotImplementedError
 
-    def CommentsGet(self, id):
+    def CommentsGet(self, key):
         raise NotImplementedError
 
     def CommentsForEntryWithKey(self, key):

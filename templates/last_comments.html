@@ -6,13 +6,13 @@
 	{% for comment in comments %}
 	<li>
 		<article class="comment" pubdate="{{ comment.published_time.strftime(date_format) }}" style="background: #FFFFFF;">
-			<a href="/{{ comment.entry.slug }}" title="{{ comment.entry.title }}">{{ comment.entry.title }}</a><br/>
+			<a href="/{{ comment.entry.key }}" title="{{ comment.entry.title }}">{{ comment.entry.title }}</a><br/>
 			<span class="author" item="vcard">
 				<a href="{{ comment.link }}" class="image-link avatar">
 					<img src="http://www.gravatar.com/avatar/{{ comment.email_md5 }}?size=40" itemprop="photo" />
 				</a>
 				<div style="font-weight: bold; float: left; margin-right: 5px;">
-					<a href="/{{ comment.entry.slug }}#{{ comment.key }}" itemprop="url">{{ comment.name }}</a>
+					<a href="/{{ comment.entry.key }}#{{ comment.key }}" itemprop="url">{{ comment.name }}</a>
 				</div>
 			</span>
 			{{ comment.comment[:50] }}...

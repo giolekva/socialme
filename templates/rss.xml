@@ -16,8 +16,8 @@
 	{% for entry in entries %}
 	<item>
 		<title>{{ escape(entry.title) }}</title>
-		<link>http://{{ request.host }}/{{ entry.slug }}</link>
-		<guid>http://{{ request.host }}/{{ entry.slug }}</guid>
+		<link>http://{{ request.host }}/{{ entry.key }}</link>
+		<guid>http://{{ request.host }}/{{ entry.key }}</guid>
 		<pubDate>{{ entry.published_time.strftime(date_format) }}</pubDate>
 		<description>
 			<![CDATA[{{ entry.body }}]]>
@@ -25,7 +25,7 @@
 		{% for tag in entry.tags %}
 		<category>{{ escape(tag) }}</category>
 		{% end %}
-		<comments>http://{{ request.host }}/{{ entry.slug }}#comments</comments>
+		<comments>http://{{ request.host }}/{{ entry.key }}#comments</comments>
 	</item>
 	{% end %}
 </channel>

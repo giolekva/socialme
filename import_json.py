@@ -27,7 +27,7 @@ def ImportJson(entries, db):
         pubdate = datetime.strptime(e["PubDate"], "%Y-%m-%dT%H:%M:%SZ")
         entry = Entry(
             title=e["Title"],
-            slug=e["Slug"],
+            key=e["Slug"],
             body=e["Content"],
             tags=e["Tags"],
             published_time=pubdate,

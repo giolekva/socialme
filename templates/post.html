@@ -24,7 +24,7 @@
 		მსგავსი პოსტები:
 		<ul>
 			{% for similar in similar_entries %}
-			<li><a href="/{{ similar.slug }}" title="{{ similar.title }}">{{ similar.title }}</a></li>
+			<li><a href="/{{ similar.key }}" title="{{ similar.title }}">{{ similar.title }}</a></li>
 			{% end %}
 		</ul>
 		{% else %}
@@ -49,7 +49,7 @@
 		{% end %}
 	</div>
 	<div id="comment_form">
-		<form action="/{{ blog.slug }}/post_comment" method="post">
+		<form action="/{{ blog.key }}/post_comment" method="post">
 			<p>
 				<input id="name" type="text" name="name" value="{{ name }}" tabindex="1" /> <label for="name">სახელი</label>
 			</p>

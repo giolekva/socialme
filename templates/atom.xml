@@ -17,9 +17,9 @@
 	</author>
 	{% for entry in entries %}
 	<entry>
-		<id>http://{{ request.host }}/entry/{{ entry.slug }}</id>
+		<id>http://{{ request.host }}/entry/{{ entry.key }}</id>
 		<title type="text">{{ escape(entry.title) }}</title>
-		<link rel="alternate" href="http://{{ request.host }}/{{ entry.slug }}" type="text/html"/>
+		<link rel="alternate" href="http://{{ request.host }}/{{ entry.key }}" type="text/html"/>
 		<updated>{{ entry.updated_time.strftime(date_format) }}</updated>
 		<published>{{ entry.published_time.strftime(date_format) }}</published>
 		<content type="xhtml" xml:base="http://{{ request.host }}/">

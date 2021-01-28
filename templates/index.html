@@ -12,7 +12,7 @@
 					<div class="day">{{ blog.published_time.day }}</div>
 					<div class="year">{{ blog.published_time.year }}</div>
 				</div>
-				<header><h2 class="entry-title"><a href="/{{ blog.slug }}" rel="bookmark" title="{{ blog.title }}">{{ blog.title }}</a></h2></header>
+				<header><h2 class="entry-title"><a href="/{{ blog.key }}" rel="bookmark" title="{{ blog.title }}">{{ blog.title }}</a></h2></header>
 				<div class="entry-content">
 					{% raw handler.make_smile(blog.body) %}
 				</div>
@@ -23,7 +23,7 @@
 						<li><a href="/tag/{{ tag }}" rel="tag">{{ tag }}</a></li>
 						{% end %}
 					</ul>
-				<a href="/{{ blog.slug }}#comments" title="კომენტარები" style="font-weight: bold;">{{ blog.comments_count }} კომენტარი</a>
+				<a href="/{{ blog.key }}#comments" title="კომენტარები" style="font-weight: bold;">{{ blog.comments_count }} კომენტარი</a>
 				</footer>
 			</article>
 		</li>

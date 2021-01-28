@@ -3,9 +3,10 @@ import sqlite3
 
 import db
 
+
 _CREATE_ENTRY_TABLE = """
 CREATE TABLE Entry (
-  slug VARCHAR(255) PRIMARY KEY,
+  key VARCHAR(255) PRIMARY KEY,
   title VARCHAR(255),
   body TEXT,
   tags TEXT,
@@ -19,7 +20,7 @@ CREATE TABLE Entry (
 _CREATE_COMMENT_TABLE = """
 CREATE TABLE Comment (
   key VARCHAR(50) PRIMARY KEY,
-  entry_slug VARCHAR(255),
+  entry_key VARCHAR(255),
   name VARCHAR(255),
   link VARCHAR(255),
   email VARCHAR(255),
@@ -61,7 +62,6 @@ def ToEntry(r):
         return None
     return db.Entry(
         key=r[0],
-        slug=r[0],
         title=r[1],
         body=r[2],
         tags=r[3].split(","),
@@ -100,21 +100,18 @@ class DB(db.DB):
     def __init__(self, conn):
         self.conn = conn
 
-    def EntriesGet(self, slug):
+    def EntriesGet(self, key):
         c = self.conn.cursor()
         c.execute(
-            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE slug = ?",
-            (slug,),
+            "SELECT key, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE key = ?",
+            (key,),
         )
         return ToEntry(c.fetchone())
-
-    def EntriesGetWithKey(self, key):
-        return EntriesGet(key)
 
     def EntriesGetPublic(self, count, after=None):
         c = self.conn.cursor()
         c.execute(
-            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? ORDER BY published_time DESC LIMIT ?",
+            "SELECT key, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? ORDER BY published_time DESC LIMIT ?",
             (
                 True,
                 count,
@@ -125,7 +122,7 @@ class DB(db.DB):
     def EntriesDateRange(self, begin, end, count, after=None):
         c = self.conn.cursor()
         c.execute(
-            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND ? <= published_time AND published_time < ? ORDER BY published_time DESC LIMIT ?",
+            "SELECT key, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND ? <= published_time AND published_time < ? ORDER BY published_time DESC LIMIT ?",
             (
                 True,
                 datetime.timestamp(begin),
@@ -138,7 +135,7 @@ class DB(db.DB):
     def EntriesPublicWithTag(self, tag, count, after=0):
         c = self.conn.cursor()
         c.execute(
-            "SELECT slug, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND instr(tags, ?) > 0 ORDER BY published_time DESC LIMIT ?",
+            "SELECT key, title, body, tags, published_time, updated_time, is_public, was_public FROM Entry WHERE is_public = ? AND instr(tags, ?) > 0 ORDER BY published_time DESC LIMIT ?",
             (
                 True,
                 tag,
@@ -155,9 +152,9 @@ class DB(db.DB):
     def EntriesSave(self, e):
         c = self.conn.cursor()
         c.execute(
-            "INSERT INTO Entry (slug, title, body, tags, published_time, updated_time, is_public, was_public) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO Entry (key, title, body, tags, published_time, updated_time, is_public, was_public) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                e.slug,
+                e.key,
                 e.title,
                 e.body,
                 ",".join(e.tags),
@@ -168,7 +165,6 @@ class DB(db.DB):
             ),
         )
         self.conn.commit()
-        e.key = e.slug
 
     def TagsAll(self):
         c = self.conn.cursor()
@@ -195,7 +191,7 @@ SELECT
   Comment.comment,
   Comment.parent_comment_key,
   Comment.published_time,
-  Entry.slug,
+  Entry.key,
   Entry.title,
   Entry.body,
   Entry.tags,
@@ -206,7 +202,7 @@ SELECT
 FROM
   Comment
 JOIN Entry ON
-  Comment.entry_slug = Entry.slug
+  Comment.entry_key = Entry.key
 ORDER BY
   Comment.published_time DESC
 LIMIT ?""",
@@ -214,7 +210,7 @@ LIMIT ?""",
         )
         return List([ToComment(c) for c in c.fetchall()])
 
-    def CommentsGet(self, id):
+    def CommentsGet(self, key):
         c = self.conn.cursor()
         c.execute(
             """
@@ -227,7 +223,7 @@ SELECT
   Comment.comment,
   Comment.parent_comment_key,
   Comment.published_time,
-  Entry.slug,
+  Entry.key,
   Entry.title,
   Entry.body,
   Entry.tags,
@@ -238,10 +234,10 @@ SELECT
 FROM
   Comment
 JOIN Entry ON
-  Comment.entry_slug = Entry.slug
+  Comment.entry_key = Entry.key
 WHERE
   Comment.key = ?""",
-            (id,),
+            (key,),
         )
         return ToComment(c.fetchonme())
 
@@ -258,7 +254,7 @@ SELECT
   Comment.comment,
   Comment.parent_comment_key,
   Comment.published_time,
-  Entry.slug,
+  Entry.key,
   Entry.title,
   Entry.body,
   Entry.tags,
@@ -269,9 +265,9 @@ SELECT
 FROM
   Comment
 JOIN Entry ON
-  Comment.entry_slug = Entry.slug
+  Comment.entry_key = Entry.key
 WHERE
-  Comment.entry_slug = ?
+  Comment.entry_key = ?
 ORDER BY
   Comment.published_time ASC""",
             (key,),
@@ -280,7 +276,7 @@ ORDER BY
 
     def CommentsCountForEntryWithKey(self, key):
         c = self.conn.cursor()
-        c.execute("SELECT COUNT(*) FROM Comment WHERE entry_slug = ?", (key,))
+        c.execute("SELECT COUNT(*) FROM Comment WHERE entry_key = ?", (key,))
         return c.fetchone()[0]
 
     def CommentsSave(self, com):
@@ -289,10 +285,10 @@ ORDER BY
             parent_comment_key = com.parent_comment.key
         c = self.conn.cursor()
         c.execute(
-            "INSERT INTO Comment (key, entry_slug, name, link, email, email_md5, comment, parent_comment_key, published_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO Comment (key, entry_key, name, link, email, email_md5, comment, parent_comment_key, published_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
-                com.md5(),
-                com.entry.slug,
+                com.key,
+                com.entry.key,
                 com.name,
                 com.link,
                 com.email,
@@ -303,4 +299,3 @@ ORDER BY
             ),
         )
         self.conn.commit()
-        com.key = com.md5()
