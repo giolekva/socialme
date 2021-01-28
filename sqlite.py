@@ -13,7 +13,8 @@ CREATE TABLE Entry (
   published_time INTEGER,
   updated_time INTEGER,
   is_public INTEGER,
-  was_public INTEGER
+  was_public INTEGER,
+  is_markdown INTEGER
 );
 """
 
@@ -40,7 +41,8 @@ SELECT
   published_time,
   updated_time,
   is_public,
-  was_public
+  was_public,
+  is_markdown
 FROM Entry
 WHERE
   key = :key
@@ -55,7 +57,8 @@ SELECT
   published_time,
   updated_time,
   is_public,
-  was_public
+  was_public,
+  is_markdown
 FROM Entry
 WHERE
   is_public = :is_public
@@ -73,7 +76,8 @@ SELECT
   published_time,
   updated_time,
   is_public,
-  was_public
+  was_public,
+  is_markdown
 FROM Entry
 WHERE
   is_public = :is_public AND
@@ -92,7 +96,8 @@ SELECT
   published_time,
   updated_time,
   is_public,
-  was_public
+  was_public,
+  is_markdown
 FROM Entry
 WHERE
   is_public = :is_public AND
@@ -120,7 +125,8 @@ INSERT INTO Entry (
   published_time,
   updated_time,
   is_public,
-  was_public)
+  was_public,
+  is_markdown)
 VALUES (
   :key,
   :title,
@@ -129,7 +135,24 @@ VALUES (
   :published_time,
   :updated_time,
   :is_public,
-  :was_public)
+  :was_public,
+  :is_markdown)
+"""
+
+_ENTRIES_UPDATE = """
+UPDATE Entry
+SET
+  key = :new_key,
+  title = :title,
+  body = :body,
+  tags = :tags,
+  published_time = :published_time,
+  updated_time = :updated_time,
+  is_public = :is_public,
+  was_public = :was_public,
+  is_markdown = :is_markdown
+WHERE
+  key = :old_key
 """
 
 _TAGS_ALL = """
@@ -157,7 +180,8 @@ SELECT
   Entry.published_time,
   Entry.updated_time,
   Entry.is_public,
-  Entry.was_public
+  Entry.was_public,
+  Entry.is_markdown
 FROM Comment
 JOIN Entry ON
   Comment.entry_key = Entry.key
@@ -183,7 +207,8 @@ SELECT
   Entry.published_time,
   Entry.updated_time,
   Entry.is_public,
-  Entry.was_public
+  Entry.was_public,
+  Entry.is_markdown
 FROM Comment
 JOIN Entry ON
   Comment.entry_key = Entry.key
@@ -208,7 +233,8 @@ SELECT
   Entry.published_time,
   Entry.updated_time,
   Entry.is_public,
-  Entry.was_public
+  Entry.was_public,
+  Entry.is_markdown
 FROM
   Comment
 JOIN Entry ON
@@ -288,6 +314,7 @@ def ToEntry(r):
         updated_time=datetime.fromtimestamp(r[5]),
         is_public=r[6],
         was_public=r[7],
+        is_markdown=r[8],
     )
 
 
@@ -384,6 +411,26 @@ class DB(db.DB):
                 "updated_time": e.updated_time,
                 "is_public": e.is_public,
                 "was_public": e.was_public,
+                "is_markdown": e.is_markdown,
+            },
+        )
+        self.conn.commit()
+
+    def EntriesUpdate(self, e, old_key):
+        c = self.conn.cursor()
+        c.execute(
+            _ENTRIES_UPDATE,
+            {
+                "old_key": old_key,
+                "new_key": e.key,
+                "title": e.title,
+                "body": e.body,
+                "tags": ",".join(e.tags),
+                "published_time": e.published_time,
+                "updated_time": e.updated_time,
+                "is_public": e.is_public,
+                "was_public": e.was_public,
+                "is_markdown": e.is_markdown,
             },
         )
         self.conn.commit()

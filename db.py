@@ -1,7 +1,7 @@
 from datetime import datetime
 import hashlib
 import re
-
+from markdown import markdown
 
 class Entry(object):
     def __init__(
@@ -14,6 +14,7 @@ class Entry(object):
         updated_time=None,
         is_public=None,
         was_public=None,
+        is_markdown=False,
     ):
         self.key = key
         self.title = title
@@ -23,10 +24,16 @@ class Entry(object):
         self.updated_time = updated_time
         self.is_public = is_public
         self.was_public = was_public
+        self.is_markdown = is_markdown
 
     def get_paragraphs(self):
         pattern = re.compile(r"^\s*(?P<line>.*?)\s*$", re.S | re.M | re.X)
         return pattern.sub("<p>\g<line></p>", self.body)
+
+    def Format(self):
+        if not self.is_markdown:
+            return self.body
+        return markdown(self.body)
 
 
 class Tag(object):
@@ -109,6 +116,9 @@ class DB(object):
         raise NotImplementedError
 
     def EntriesSave(self, entry):
+        raise NotImplementedError
+
+    def EntriesUpdate(self, entry, old_key):
         raise NotImplementedError
 
     def TagsAll(self):

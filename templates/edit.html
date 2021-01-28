@@ -5,7 +5,8 @@
 	<input type="text" name="title" style="width: 300px;" value="{{ blog.title }}" /> სათაური<br/>
 	<input type="text" name="key" style="width: 300px;" value="{{ blog.key }}" /> key<br/>
 	<textarea rows="30" cols="50" name="body">{{ blog.body }}</textarea>
-	<input type="text" name="tags" style="width: 300px;" value="{{ blog.tags }}" /> ტეგები<br/>
+	<input type="text" name="tags" style="width: 300px;" value="{{ ', '.join(blog.tags) }}" /> ტეგები<br/>
+	<input type="checkbox" name="is_markdown" value="True" {% if blog.is_markdown %}checked{% end %} /> markdown<br/>
 	<input type="submit" name="publish" value="გამოქვეყნება" /> <input type="submit" name="save" value="შენახვა">
 </form>
 {% end %}

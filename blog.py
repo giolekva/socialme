@@ -222,15 +222,19 @@ class EditHandler(BaseHandler):
         AugmentWithCommentCounts([entry], self.db)
         self.render("edit.html", blog=entry, edit_path="/edit/%s" % key)
 
-    def post(self, key):
+    def post(self, old_key):
         body = self.get_argument("body")
         title = self.get_argument("title")
+        new_key = self.get_argument("key").replace(" ", "-")
         tags = [tag.strip(" ") for tag in self.get_argument("tags").split(",")]
-        entry = self.db.EntriesGet(key)
+        is_markdown = "is_markdown" in self.request.arguments
+        entry = self.db.EntriesGet(old_key)
         was_public = entry.was_public
+        entry.key = new_key
         entry.body = body
         entry.title = title
         entry.tags = tags
+        entry.is_markdown = is_markdown
         if self.get_argument("save", None):
             entry.is_public = False
         else:
@@ -238,7 +242,7 @@ class EditHandler(BaseHandler):
                 entry.published_time = datetime.now()
             entry.is_public = True
             entry.was_public = True
-        self.db.EntriesSave(entry)
+        self.db.EntriesUpdate(entry, old_key)
         self.redirect("/%s" % entry.key)
 
 

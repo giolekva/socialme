@@ -3,6 +3,9 @@ load("@dependencies//:requirements.bzl", "requirement")
 py_library(
     name = "db",
     srcs = ["db.py"],
+    deps = [
+        requirement("markdown"),
+    ],
 )
 
 py_library(
