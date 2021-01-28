@@ -49,3 +49,12 @@ py_binary(
         ":sqlite",
     ],
 )
+
+py_binary(
+    name = "import_blogspot",
+    srcs = ["import_blogspot.py"],
+    deps = [
+        ":db",
+        ":sqlite",
+    ],
+)

@@ -12,7 +12,6 @@ from blog import *
 
 def SetupServer(db):
     handlers = [
-        (r"/import$", ImportHandler),
         (r"/edit/([^/]+)$", EditHandler),
         (r"/edit$", NewEntryHandler),
         (r"/feed$", AtomHandler),

@@ -1,6 +1,5 @@
 ﻿import re
 from datetime import datetime, date
-from xml import sax
 
 from tornado import web
 
@@ -104,9 +103,9 @@ class ArchiveHandler(BaseHandler):
             next_year += 1
         now = datetime(year=year, month=month, day=1)
         next = datetime(year=next_year, month=next_month, day=1)
-        blogs = self.db.EntriesDateRange(now, next, 6, 5 * (page - 1))
-        has_next = CheckHasNextPage(blogs)
-        blogs = AugmentWithCommentCounts(blogs, self.db)
+        entries = self.db.EntriesDateRange(now, next, 6, 5 * (page - 1))
+        has_next = CheckHasNextPage(entries)
+        entries = AugmentWithCommentCounts(entries, self.db)
         title = "არქივი %d %s" % (
             year,
             self.settings["months"][int(month) - 1],
@@ -117,7 +116,7 @@ class ArchiveHandler(BaseHandler):
             month = str(month)
         self.render(
             "index.html",
-            blogs=blogs,
+            blogs=entries,
             current_page=page,
             has_next=has_next,
             nav_path="/%d/%s" % (year, month),
@@ -142,8 +141,8 @@ def GenerateThreadedComments(current, comments, dif=0):
 
 class EntryHandler(BaseHandler):
     def get(self, key):
-        blog = self.db.EntriesGet(key)
-        if blog is None:
+        entry = self.db.EntriesGet(key)
+        if entry is None:
             raise web.HTTPError(404)
         else:
             id = self.get_cookie("whoami")
@@ -160,25 +159,25 @@ class EntryHandler(BaseHandler):
                     email_md5 = c.email_md5
             if link == "" or link is None:
                 link = "http://"
-            comments = self.db.CommentsForEntryWithKey(blog.key)
-            blog.comments_count = len(comments)
+            comments = self.db.CommentsForEntryWithKey(entry.key)
+            entry.comments_count = len(comments)
             comments = GenerateThreadedComments(None, comments)
             self.render(
                 "post.html",
-                blog=blog,
+                blog=entry,
                 name=name,
                 link=link,
                 email=email,
                 email_md5=email_md5,
                 comments=comments,
-                similar_entries=self.db.EntriesSimilar(blog),
+                similar_entries=self.db.EntriesSimilar(entry),
             )
 
 
 class PostComment(BaseHandler):
     def post(self, key):
-        blog = self.db.EntriesGet(key)
-        if blog is None:
+        entry = self.db.EntriesGet(key)
+        if entry is None:
             raise web.HTTPError(404)
         else:
             name = self.get_argument("name", None)
@@ -190,13 +189,13 @@ class PostComment(BaseHandler):
             if honypot is not None:
                 raise web.HTTPError(403)
             if name is None or email is None or comm is None:
-                self.redirect("/%s" % blog.key)
+                self.redirect("/%s" % entry.key)
                 return
             if link == "http://" or link == "":
                 link = None
             if parent_comment is None:
                 comment = Comment(
-                    entry=blog,
+                    entry=entry,
                     name=name,
                     link=link,
                     email=email,
@@ -205,7 +204,7 @@ class PostComment(BaseHandler):
                 )
             else:
                 comment = Comment(
-                    entry=blog,
+                    entry=entry,
                     name=name,
                     link=link,
                     email=email,
@@ -214,59 +213,33 @@ class PostComment(BaseHandler):
                 )
             self.db.CommentsSave(comment)
             self.set_cookie("whoami", str(comment.key))
-            self.redirect("/%s" % blog.key)
-
-
-def SaveNewEntry(
-    db,
-    title,
-    key,
-    body,
-    tags,
-    published_time=datetime.now(),
-    updated=datetime.now(),
-    is_public=True,
-    was_public=True,
-):
-    key = key.replace(" ", "-")
-    blog = Entry(
-        title=title,
-        key=key,
-        body=body,
-        tags=tags,
-        published_time=published_time,
-        updated_time=updated,
-        is_public=is_public,
-        was_public=was_public,
-    )
-    db.EntriesSave(blog)
-    return blog
+            self.redirect("/%s" % entry.key)
 
 
 class EditHandler(BaseHandler):
     def get(self, key):
-        blog = self.db.EntriesGet(key)
-        AugmentWithCommentCounts([blog], self.db)
-        self.render("edit.html", blog=blog, edit_path="/edit/%s" % key)
+        entry = self.db.EntriesGet(key)
+        AugmentWithCommentCounts([entry], self.db)
+        self.render("edit.html", blog=entry, edit_path="/edit/%s" % key)
 
     def post(self, key):
         body = self.get_argument("body")
         title = self.get_argument("title")
         tags = [tag.strip(" ") for tag in self.get_argument("tags").split(",")]
-        blog = self.db.EntriesGet(key)
-        was_public = blog.was_public
-        blog.body = body
-        blog.title = title
-        blog.tags = tags
+        entry = self.db.EntriesGet(key)
+        was_public = entry.was_public
+        entry.body = body
+        entry.title = title
+        entry.tags = tags
         if self.get_argument("save", None):
-            blog.is_public = False
+            entry.is_public = False
         else:
-            if not blog.was_public:
-                blog.published_time = datetime.now()
-            blog.is_public = True
-            blog.was_public = True
-        self.db.EntriesSave(blog)
-        self.redirect("/%s" % blog.key)
+            if not entry.was_public:
+                entry.published_time = datetime.now()
+            entry.is_public = True
+            entry.was_public = True
+        self.db.EntriesSave(entry)
+        self.redirect("/%s" % entry.key)
 
 
 class NewEntryHandler(BaseHandler):
@@ -279,7 +252,7 @@ class NewEntryHandler(BaseHandler):
 
     def post(self):
         title = self.get_argument("title")
-        key = self.get_argument("key")
+        key = self.get_argument("key").replace(" ", "-")
         body = self.get_argument("body")
         if self.get_argument("save", None):
             is_public = False
@@ -288,10 +261,19 @@ class NewEntryHandler(BaseHandler):
             is_public = True
             was_public = True
         tags = [tag.strip(" ") for tag in self.get_argument("tags").split(",")]
-        blog = SaveNewEntry(
-            self.db, title, key, body, tags, is_public=is_public, was_public=was_public
+        now = datetime.now()
+        entry = Entry(
+            key=key,
+            title=tile,
+            body=body,
+            tags=tags,
+            published_time=now,
+            updated_time=now,
+            is_public=is_public,
+            was_public=was_public,
         )
-        self.redirect("/%s" % blog.key)
+        self.db.EntriesSave(entry)
+        self.redirect("/%s" % entry.key)
 
 
 class AtomHandler(web.RequestHandler):
@@ -308,166 +290,3 @@ class RSSHandler(web.RequestHandler):
         db = self.settings["db"]
         entries = AugmentWithCommentCounts(db.EntriesGetPublic(10), db)
         self.render("rss.xml", entries=entries)
-
-
-# წასაშლელია, gdata-ს გამოყენება ჯობია
-def to_date(s):
-    s = s.encode("utf-8")
-    pattern = re.compile(
-        r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).(\d{3})\+(\d{2}):(\d{2})"
-    )
-    match = pattern.match(str(s))
-    g = [int(x) for x in match.groups()]
-    return datetime(g[0], g[1], g[2], g[3], g[4], g[5], g[6])
-
-
-class CommentsHandler(sax.handler.ContentHandler):
-    def __init__(self, blog):
-        self.content = ""
-        self.email = ""
-        self.entry = blog
-        self.is_entry = 0
-        self.is_published = 0
-        self.is_content = 0
-        self.is_name = 0
-        self.is_uri = 0
-
-    def startElement(self, name, attrs):
-        self.content = ""
-        if name == "entry":
-            self.is_entry = 1
-            self.link = ""
-            self.email = "noemail@email.com"
-        elif name == "published":
-            self.is_published = 1
-        elif name == "content":
-            self.is_content = 1
-        elif name == "name":
-            self.is_name = 1
-        elif name == "uri":
-            self.is_uri = 1
-
-    def endElement(self, name):
-        if name == "entry":
-            self.is_entry = 0
-            com = Comment(
-                parent=self.entry,
-                name=self.name,
-                link=self.link,
-                email=self.email,
-                published_time=self.published_time,
-                comment=self.comment,
-            )
-            com.put()
-        elif name == "published":
-            self.is_published = 0
-            if self.is_entry:
-                self.published_time = to_date(self.content)
-        elif name == "content":
-            self.is_content = 0
-            if self.is_entry:
-                self.comment = self.content
-        elif name == "name":
-            self.is_name = 0
-            if self.is_entry:
-                self.name = self.content
-        elif name == "uri":
-            self.is_uri = 0
-            if self.is_entry:
-                self.link = self.content
-
-    def characters(self, ch):
-        self.content += ch
-
-
-def import_comments(url, blog):
-    import urllib
-
-    f = urllib.urlopen(url)
-    sax.parseString(f.read(), CommentsHandler(blog))
-
-
-class EntriesHandler(sax.handler.ContentHandler):
-    def __init__(self):
-        self.content = ""
-        self.is_entry = 0
-        self.is_title = 0
-        self.is_content = 0
-        self.is_category = 0
-        self.is_link = 0
-        self.is_published = 0
-        self.is_updated = 0
-        self.link_count = 0
-
-    def startElement(self, name, attrs):
-        self.content = ""
-        if name == "entry":
-            self.is_entry = 1
-            self.title = ""
-            self.body = ""
-            self.link_count = 0
-            self.tags = []
-        elif name == "title":
-            self.is_title = 1
-        elif name == "content":
-            self.is_content = 1
-        elif name == "category":
-            self.is_category = 1
-            self.tags.append(attrs.items()[0][1])
-        elif name == "link":
-            self.is_link = 1
-            self.link_count += 1
-            if self.is_entry and self.link_count == 1:
-                self.comments_url = attrs.items()[0][1]
-        elif name == "published":
-            self.is_published = 1
-        elif name == "updated":
-            self.is_updated = 1
-
-    def endElement(self, name):
-        if name == "entry":
-            self.is_entry = 0
-            blog = SaveNewEntry(
-                self.db,
-                self.title,
-                self.title,
-                self.body,
-                self.tags,
-                self.published_time,
-                self.updated,
-                True,
-                True,
-            )
-            import_comments(self.comments_url, blog)
-        elif name == "title":
-            self.is_title = 0
-            if self.is_entry:
-                self.title = self.content
-        elif name == "content":
-            self.is_content = 0
-            if self.is_entry:
-                self.body = self.content
-        elif name == "category":
-            self.is_category = 0
-        elif name == "link":
-            self.is_link = 0
-        elif name == "published":
-            self.is_published = 0
-            if self.is_entry:
-                self.published_time = to_date(self.content)
-        elif name == "updated":
-            self.is_updated = 0
-            if self.is_entry:
-                self.updated = to_date(self.content)
-
-    def characters(self, ch):
-        self.content += ch
-
-
-class ImportHandler(web.RequestHandler):
-    def get(self):
-        blogger_id = self.settings["blogger_id"]
-        import urllib
-
-        f = urllib.urlopen("http://www.blogger.com/feeds/%s/posts/default" % blogger_id)
-        sax.parseString(f.read(), EntriesHandler())
