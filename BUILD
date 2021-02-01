@@ -45,6 +45,18 @@ py_binary(
 )
 
 py_binary(
+    name = "import_git",
+    srcs = ["import_git.py"],
+    deps = [
+        requirement("gitdb"),
+        requirement("gitpython"),
+        requirement("markdown"),
+        ":db",
+        ":sqlite",
+    ],
+)
+
+py_binary(
     name = "import_json",
     srcs = ["import_json.py"],
     deps = [

@@ -1,2 +1,4 @@
+gitdb
+gitpython
 tornado==6.1.0
 markdown

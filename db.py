@@ -30,6 +30,7 @@ class Entry(object):
         pattern = re.compile(r"^\s*(?P<line>.*?)\s*$", re.S | re.M | re.X)
         return pattern.sub("<p>\g<line></p>", self.body)
 
+    # TODO(giolekva): move this out
     def Format(self):
         if not self.is_markdown:
             return self.body
