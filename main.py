@@ -3,11 +3,13 @@
 import time
 import os
 
+import git
 import tornado.ioloop
 import tornado.web
 
-import sqlite
 from blog import *
+import dbgit
+import sqlite
 
 
 def SetupServer(db):
@@ -55,7 +57,7 @@ def SetupServer(db):
 
 
 def Main():
-    db = sqlite.OpenDB("socialme.db")
+    db = dbgit.GitDB(git.Repo("/Users/lekva/dev/src/b"), sqlite.OpenDB(":memory:"))
     app = SetupServer(db)
     app.listen(8081)
     tornado.ioloop.IOLoop.current().start()

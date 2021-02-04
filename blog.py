@@ -130,11 +130,11 @@ def GenerateThreadedComments(current, comments, dif=0):
         ret.append({"dif": dif, "comment": current})
     if current is None:
         for c in comments:
-            if c.parent_comment is None:
+            if c.parent_comment_key is None:
                 ret.extend(GenerateThreadedComments(c, comments, dif))
     else:
         for c in comments:
-            if c.parent_comment is not None and c.parent_comment.key == current.key:
+            if c.parent_comment_key == current.key:
                 ret.extend(GenerateThreadedComments(c, comments, dif + 20))
     return ret
 
@@ -187,30 +187,25 @@ class PostComment(BaseHandler):
             parent_comment = self.get_argument("parent_comment", None)
             honypot = self.get_argument("honypot", None)
             if honypot is not None:
-                raise web.HTTPError(403)
+                pass
+                # raise web.HTTPError(403)
             if name is None or email is None or comm is None:
                 self.redirect("/%s" % entry.key)
                 return
             if link == "http://" or link == "":
                 link = None
-            if parent_comment is None:
-                comment = Comment(
-                    entry=entry,
-                    name=name,
-                    link=link,
-                    email=email,
-                    comment=comm,
-                    parent_comment=None,
-                )
-            else:
-                comment = Comment(
-                    entry=entry,
-                    name=name,
-                    link=link,
-                    email=email,
-                    comment=comm,
-                    parent_comment=self.db.CommentsGet(parent_comment),
-                )
+            published_time = datetime.now()
+            comment = Comment(
+                entry=entry,
+                name=name,
+                link=link,
+                email=email,
+                comment=comm,
+                parent_comment=None,
+                published_time=published_time,
+            )
+            if parent_comment:
+                comment.parent_comment = self.db.CommentsGet(parent_comment)
             self.db.CommentsSave(comment)
             self.set_cookie("whoami", str(comment.key))
             self.redirect("/%s" % entry.key)

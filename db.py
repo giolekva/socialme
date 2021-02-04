@@ -3,6 +3,7 @@ import hashlib
 import re
 from markdown import markdown
 
+
 class Entry(object):
     def __init__(
         self,
@@ -48,17 +49,21 @@ class Comment(object):
         self,
         key=None,
         entry=None,
+        entry_key=None,
         name=None,
         link=None,
         email=None,
         email_md5=None,
         comment=None,
         parent_comment=None,
+        parent_comment_key=None,
         published_time=None,
     ):
         if key:
             self._key = key
         self.entry = entry
+        if entry_key:
+            self._entry_key = entry_key
         self.name = name
         self.link = link
         self.email = email
@@ -66,13 +71,26 @@ class Comment(object):
             self._email_md5 = email_md5
         self.comment = comment
         self.parent_comment = parent_comment
+        if parent_comment_key:
+            self._parent_comment_key = parent_comment_key
         self.published_time = published_time
+
+    def __iter__(self):
+        yield ("entry_key", self.entry.key)
+        if self.parent_comment:
+            yield ("parent_comment_key", self.parent_comment.key)
+        yield (
+            "published_time",
+            datetime.strftime(self.published_time, "%Y-%m-%dT%H:%M:%SZ"),
+        )
+        for k in ["key", "name", "link", "email", "email_md5", "comment"]:
+            yield (k, getattr(self, k))
 
     @property
     def email_md5(self):
         if not hasattr(self, "_email_md5"):
             m = hashlib.md5()
-            m.update(self.email)
+            m.update(self.email.encode("UTF-8"))
             self._email_md5 = m.hexdigest()
         return self._email_md5
 
@@ -91,6 +109,20 @@ class Comment(object):
             m.update(str(datetime.timestamp(self.published_time)).encode("UTF-8"))
             self._key = m.hexdigest()
         return self._key
+
+    @property
+    def entry_key(self):
+        if hasattr(self, "_entry_key"):
+            return self._entry_key
+        return self.entry.key
+
+    @property
+    def parent_comment_key(self):
+        if hasattr(self, "_parent_comment_key"):
+            return self._parent_comment_key
+        if self.parent_comment:
+            return self.parent_comment.key
+        return None
 
 
 class Archive(object):

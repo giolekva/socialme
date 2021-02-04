@@ -28,6 +28,14 @@ py_library(
     ],
 )
 
+py_library(
+    name = "dbgit",
+    srcs = ["dbgit.py"],
+    deps = [
+        ":db",
+    ],
+)
+
 py_binary(
     name = "socialme",
     srcs = ["main.py"],
@@ -40,7 +48,11 @@ py_binary(
     main = "main.py",
     deps = [
         ":core",
+        ":dbgit",
         ":sqlite",
+        requirement("gitdb"),
+        requirement("gitpython"),
+        requirement("markdown"),
     ],
 )
 

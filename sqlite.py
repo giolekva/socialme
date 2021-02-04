@@ -461,7 +461,7 @@ class DB(db.DB):
             _COMMENTS_GET,
             {"key": key},
         )
-        return ToComment(c.fetchonme())
+        return ToComment(c.fetchone())
 
     def CommentsForEntryWithKey(self, key):
         c = self.conn.cursor()
@@ -477,21 +477,18 @@ class DB(db.DB):
         return c.fetchone()[0]
 
     def CommentsSave(self, com):
-        parent_comment_key = None
-        if com.parent_comment:
-            parent_comment_key = com.parent_comment.key
         c = self.conn.cursor()
         c.execute(
             _COMMENTS_SAVE,
             {
                 "key": com.key,
-                "entry_key": com.entry.key,
+                "entry_key": com.entry_key,
                 "name": com.name,
                 "link": com.link,
                 "email": com.email,
                 "email_md5": com.email_md5,
                 "comment": com.comment,
-                "parent_comment_key": parent_comment_key,
+                "parent_comment_key": com.parent_comment_key,
                 "published_time": com.published_time,
             },
         )
